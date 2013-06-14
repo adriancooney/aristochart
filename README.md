@@ -10,7 +10,7 @@ Every find yourself looking for a chart library that isn't so damn huge and does
 * Retina scaling
 
 ## Usage
-Aristochart has a simple enough interface. Simple plug in the canvas element (or parent) along with some data and your good to go.
+Aristochart has a simple enough interface. Plug in the canvas element (or placeholder) along with some data and you're good to go.
 
 	new Aristochart(document.body, {
 		data: {
@@ -26,7 +26,7 @@ Aristochart has a simple enough interface. Simple plug in the canvas element (or
 * Themes.
 
 ## Theming
-Duplicate the `themes/default` and edit at will. All themes are merged with the defaults where the theme overwrites the defaults so any property omitted in the theme will still be present from the defaults. Take a screenshot of it being used in `examples/basic` and save it in your themes folder as `screenshot` and then submit a pull request. All themes are welcome!
+Duplicate the `themes/default` and edit at will. All themes are merged with the defaults where the theme overwrites the defaults so any property omitted in the theme will still be present from the defaults. Take a screenshot of it being used in `examples/basic` and save it in the `themes` folder as "screenshot". Submit a pull request and get yourself on the contributors list. All themes are welcome!
 
 ### Concepts
 Every feature in Aristochart has a render function whereby the appropriate data is sent and it's up to that functio to render it on screen. Aristochart is more like a data manager and delegates the rendering to the appropriate functions. This table shows the parameters that are sent to the different functions.
@@ -35,4 +35,4 @@ Every feature in Aristochart has a render function whereby the appropriate data 
 Currently only one theme has been implemented so far.
 
 ### Orange
-![Orange Theme](/themes/screenies/orange.png "Orange")
+![Orange Theme](/themes/orange/screenshot.png "Orange")
