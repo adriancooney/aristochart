@@ -17,7 +17,7 @@ Aristochart has a simple enough interface. Simple plug in the canvas element (or
 			x: 10,
 			y: [0, 1, 2, 3, 4, 5, 6, 6, 5, 4, 3, 3, 4, 5, 6, 7, 8, 9, 10]
 		}
-	}, Aristochart.themes.orange);
+	});
 
 ![Basic](/examples/basic/basic.png "Basic")
 

@@ -71,6 +71,24 @@ var Aristochart = function(element, options, theme) {
 		},
 
 		style: {
+			y: {
+				line: {
+					stroke: "#298281"
+				}
+			},
+
+			y1: {
+				line: {
+					stroke: "#49bfbf"
+				}
+			},
+
+			y2: {
+				line: {
+					stroke: "#49bfd4"
+				}
+			},
+
 			default: {
 				point: {
 					stroke: "#000",
@@ -83,7 +101,7 @@ var Aristochart = function(element, options, theme) {
 				line: {
 					stroke: "#f00",
 					width: 3,
-					fill: "rgba(0,0,0,0.3)"
+					fill: "rgba(150, 215, 226, 0.4)"
 				},
 
 				axis: {
@@ -299,7 +317,7 @@ Aristochart.prototype.render = function() {
 
 			case "line":
 				for(var line in lines)
-					that.options.line.render.call(that, defaults, lines[line]);
+					that.options.line.render.call(that, that.options.style[line] || defaults, lines[line]);
 			break;
 
 			case "tick":
