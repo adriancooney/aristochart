@@ -1,0 +1,17 @@
+<html>
+<head>
+	<title>Basic Example Aristochart</title>
+    <script src="../../Aristochart.js"></script>
+</head>
+<body>
+<p>Open the console and check out the `graph` variable to get a more indepth look at aristochart.</p>
+</body>
+<script type="text/javascript">
+	window.graph = new Aristochart(document.body, {
+		data: {
+			x: 10,
+			y: [0, 1, 2, 3, 4, 5, 6, 6, 5, 4, 3, 3, 4, 5, 6, 7, 8, 9, 10]
+		}
+	}, Aristochart.themes.orange);
+</script>
+</html>
