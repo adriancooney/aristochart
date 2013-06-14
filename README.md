@@ -3,11 +3,11 @@
 Every find yourself looking for a chart library that isn't so damn huge and doesn't have any dependencies? I did too and couldn't find any so I decided to create my own. Aristochart is small but it's robust and made to be hacked. The main focus was customization so the library is incredibly extensible.
 
 ## Features
-* Highly customizable, extensible and flexible
-* Multiple graphing abilities
-* Automatic data scaling
-* Custom labelling
-* Retina scaling
+* Highly customizable, extensible and flexible.
+* Multiple graph ability.
+* Automatic data scaling.
+* Custom labelling.
+* Retina scaling.
 
 ## Usage
 Aristochart has a simple enough interface. Plug in the canvas element (or placeholder) along with some data and you're good to go.
@@ -34,7 +34,6 @@ Duplicate the `themes/default` and edit at will. All themes are merged with the 
 Every feature in Aristochart has a render function whereby the appropriate data is sent and it's up to that functio to render it on screen. Aristochart is more like a data manager and delegates the rendering to the appropriate functions. This table shows the parameters that are sent to the different functions.
 
 ## Themes
-Currently only one theme has been implemented so far.
 
 ### Orange
 ![Orange Theme](/themes/orange/screenshot.png "Orange")
