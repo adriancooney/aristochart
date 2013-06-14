@@ -84,15 +84,19 @@ var Aristochart = function(element, options, theme) {
 			render: Aristochart.line.fill
 		},
 
-		axes: {
+		axis: {
 			index: 1,
 			render: Aristochart.axes.line,
 			x: {
-				step: 5
+				steps: 5
+			},
+
+			y: {
+				steps: 10
 			}
 		},
 
-		ticks: {
+		tick: {
 			index: 2,
 			render: Aristochart.ticks.line
 		},
@@ -107,30 +111,13 @@ var Aristochart = function(element, options, theme) {
 			render: Aristochart.point.circle
 		},
 
+		label: {
+			index: 5,
+			render: Aristochart.label.text
+		},
+
 		style: {
-			y1: {
-				color: "#f00",
-				point: {
-					fill: "#f00"
-				}
-			},
-
-			y2: {
-				color: "#f0f",
-				point: {
-					fill: "#f0f"
-				}
-			},
-
-			y3: {
-				color: "#00f",
-				point: {
-					color: "#00f"
-				}
-			},
-
 			default: {
-				color: "#000",
 				point: {
 					stroke: "#000",
 					fill: "#000",
@@ -145,9 +132,26 @@ var Aristochart = function(element, options, theme) {
 					fill: "rgba(0,0,0,0.3)"
 				},
 
-				axes: {
+				axis: {
 					stroke: "#ddd",
 					width: 3
+				},
+
+				tick: {
+					align: "outside", //"outside", "inside",
+					stroke: "#ddd",
+					width: 2,
+					minor: 10,
+					major: 15
+				},
+
+				label: {
+					font: "Helvetica",
+					fontSize: 14,
+					align: "center",
+					baseline: "bottom",
+					offsetY: 8,
+					offsetX: 3
 				}
 			}
 		}
@@ -169,21 +173,22 @@ var Aristochart = function(element, options, theme) {
 		for(var key in this.options.style["default"]) 
 			this.options.style[style] = Aristochart.deepMerge(this.options.style["default"], this.options.style[style]);
 
-	// Feature specific sorting
-	if(!this.options.axes.x) this.options.axes.x = {};
-	if(!this.options.axes.x.render) this.options.axes.x.render = this.options.axes.render;
-	if(!this.options.axes.y) this.options.axes.y = {};
-	if(!this.options.axes.y.render) this.options.axes.y.render = this.options.axes.render;
+	// Feature specific options
+	if(!this.options.axis.x) this.options.axis.x = {};
+	if(!this.options.axis.x.render) this.options.axis.x.render = this.options.axis.render;
+	if(!this.options.axis.y) this.options.axis.y = {};
+	if(!this.options.axis.y.render) this.options.axis.y.render = this.options.axis.render;
 
 	// Sort out indexes
 	this.indexes = [], that = this;
-	["axes", "ticks", "fill", "point", "line"].forEach(function(feature) {
+	["fill", "axis", "tick", "line", "point", "label"].forEach(function(feature) {
+		console.log(feature);
 		//Set the index to the value
 		if(that.indexes[that.options[feature].index]) throw new Error("Conflicting indexes in Aristochart");
 		else that.indexes[that.options[feature].index] = feature;
 	});
 
-	//Filter out the undefines
+	//Filter out the undefineds
 	this.indexes = this.indexes.filter(function(val) {
 		if(val) return true;
 	});
@@ -193,15 +198,8 @@ var Aristochart = function(element, options, theme) {
 	else this.data.x = [this.data.x[0], this.data.x[this.data.x.length - 1]];
 
 	// Calculate the step
-	this.data.x.push(this.data.x[1]/this.options.axes.x.step);
+	this.data.x.push(this.data.x[1]/this.options.axis.x.steps);
 
-	// Calculate the bounding box
-	this.box = {
-		x: this.options.margin, 
-		y: this.options.margin, 
-		x1: this.options.width - (2*this.options.margin), 
-		y1: this.options.height - (2*this.options.margin)
-	};
 
 	// Set the canvas
 	if(this.canvas.getContext) this.ctx = this.canvas.getContext("2d");
@@ -216,27 +214,30 @@ var Aristochart = function(element, options, theme) {
 	this.canvas.height = this.options.height;
 	this.canvas.width = this.options.width;
 
+	//Fix for retina
+	if(window.devicePixelRatio > 1) {
+		this.canvas.height = this.options.height * window.devicePixelRatio;
+		this.canvas.width = this.options.width * window.devicePixelRatio;
+		this.canvas.style.height = this.options.height + "px";
+		this.canvas.style.width = this.options.width + "px";
+	}
+
+	this.scale = window.devicePixelRatio || 1;
+
 	// And render this bitch
 	this.render();
 };
 
+Aristochart.prototype.applyScale = function() {
+	var scale = this.scale;
+	this.options.margin *= scale;
+	this.options.padding *= scale;
+	this.options.width *= scale;
+	this.options.height *= scale;
+};
+
 /**
  * Deep merge two object a and b
- *
- * @example
- *		Aristochart.deepMerge({
- *			a: {
- *				foo: {
- *					bar: 1
- *				}
- *			}
- *		},
- *		{
- *			a: {
- *				bar: 1
- *			},
- *			c: 1
- *		})
  * 
  * @param  {Object} a The object to merge with
  * @param  {Object} b The recipient of the merge or the object to be merged into
@@ -253,10 +254,41 @@ Aristochart.deepMerge = function(defaults, options) {
 	})(defaults, options)
 };
 
+Aristochart.prototype.refreshMaxes = function() {
+	// Get absolute max
+	this.yMax = -Infinity;
+	this.yMin = Infinity;
+	for(var key in this.data) {
+		if(key !== "x") {
+			var max = -Infinity, min = Infinity;
+			this.data[key].forEach(function(v) { if(v > max) max = v; if(v < min) min = v; });
+			this.yMax = (max > this.yMax) ? max : this.yMax;
+			this.yMin = (min < this.yMin) ? min : this.yMin;
+		}
+	}
+}
+
 Aristochart.prototype.render = function() {
+
+	// Apply the scale to all the dimensions
+	this.applyScale();
+
+	// Calculate the bounding box
+	this.box = {
+		x: this.options.margin, 
+		y: this.options.margin, 
+		x1: this.options.width - (2*this.options.margin), 
+		y1: this.options.height - (2*this.options.margin)
+	};
+
+	// Refresh the maxes
+	this.refreshMaxes();
+
 	var that = this,
 		lines = this.getPoints(),
 		defaults = that.options.style.default;
+	// Clear the canvas
+	this.canvas.width = this.canvas.width;
 
 	// Iterate over indexes
 	this.indexes.forEach(function(feature) {
@@ -269,11 +301,11 @@ Aristochart.prototype.render = function() {
 						});
 			break;
 
-			case "axes":
+			case "axis":
 				var padding = that.options.padding,
 					box = that.box;
-				that.options.axes.x.render.call(that, that.options.style["line"] || defaults, box.x - padding, box.y + box.y1 + padding, that.box.x + box.x1 + padding, box.y + box.y1 + padding, "x");
-				that.options.axes.y.render.call(that, that.options.style["line"] || defaults, box.x - padding, box.y - padding, box.x - padding, box.y + box.y1 + padding, "y");
+				that.options.axis.x.render.call(that, that.options.style["line"] || defaults, box.x - padding, box.y + box.y1 + padding, that.box.x + box.x1 + padding, box.y + box.y1 + padding, "x");
+				that.options.axis.y.render.call(that, that.options.style["line"] || defaults, box.x - padding, box.y - padding, box.x - padding, box.y + box.y1 + padding, "y");
 			break;
 
 			case "line":
@@ -281,7 +313,26 @@ Aristochart.prototype.render = function() {
 					that.options.line.render.call(that, that.options.style[line] || defaults, lines[line]);
 			break;
 
-			case "ticks":
+			case "tick":
+				var stepX = that.options.axis.x.steps,
+					stepY = that.options.axis.y.steps,
+					disX = that.box.x1/(stepX),
+					disY = that.box.y1/(stepY);
+
+				for(var i = 0; i < (stepX + 1); i++) that.options.tick.render.call(that, that.options.style["tick"] || defaults, that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
+				for(var i = 0; i < (stepY + 1); i++) that.options.tick.render.call(that, that.options.style["tick"] || defaults, that.box.x - that.options.padding, that.box.y + (disY * i), "y", i);
+			break;
+
+			case "label":
+				var stepX = that.options.axis.x.steps,
+					stepY = that.options.axis.y.steps,
+					disX = that.box.x1/(stepX),
+					disY = that.box.y1/(stepY); 
+
+				for(var i = 0; i < (stepX + 1); i++) 
+					that.options.label.render.call(that, that.options.style["label"] || defaults, that.data.x[0] + ((that.data.x[1]/stepX) * i), that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
+				for(var i = 0; i < (stepY + 1); i++) 
+					that.options.label.render.call(that, that.options.style["label"] || defaults, that.yMax - (that.yMin + ((that.yMax/stepY) * i)), that.box.x - that.options.padding, that.box.y + (disY * i), "y", i);
 
 			break;
 
@@ -296,15 +347,6 @@ Aristochart.prototype.render = function() {
 Aristochart.prototype.getPoints = function(callback) {
 	var lines = {};
 
-	// Get absolute max
-	var absMax = 0;
-	for(var key in this.data) {
-		if(key !== "x") {
-			var m = max(this.data[key]);
-			absMax = (m > absMax) ? m : absMax;
-		}
-	}
-
 	//Iterate over y1, y2 etc.
 	for(var key in this.data) {
 		if(key !== "x") {
@@ -317,9 +359,12 @@ Aristochart.prototype.getPoints = function(callback) {
 					x = (this.data.x[1]/(currArr.length - 1)) * i,
 					y = currArr[i],
 
+					x = this.normalize(x),
+					y = this.normalize(y),
+
 					// Calculate the raster points
 					rx = this.box.x + (this.box.x1*(x/this.data.x[1]));
-					ry = this.box.y + (this.box.y1 - (this.box.y1*(y/absMax)));
+					ry = this.box.y + (this.box.y1 - (this.box.y1*(y/this.yMax)));
 
 				lines[key].push({x: x, y: y, rx: rx, ry: ry});
 
@@ -327,19 +372,16 @@ Aristochart.prototype.getPoints = function(callback) {
 			}
 		}
 	}
-
-	function max(arr) {
-		var m = 0;
-		arr.forEach(function(val) { if(val > m) m = val; });
-		return m;
-	}
-
 	return lines;
 };
 
 Aristochart.prototype.iterateOverPoints = function(callback) {
 	this.getPoints(callback);
-}
+};
+
+Aristochart.prototype.normalize = function(val) {
+	return val;
+};
 
 /**
  * Aristochart's default render functions
@@ -348,10 +390,10 @@ Aristochart.point = {
 	circle: function(style, rx, ry, x, y, graph) {
 		this.ctx.save();
 		this.ctx.strokeStyle = style.point.stroke;
-		this.ctx.lineWidth = style.point.width;
+		this.ctx.lineWidth = style.point.width * this.scale;
 		this.ctx.fillStyle = style.point.fill;
 		this.ctx.beginPath();
-		this.ctx.arc(rx, ry, style.point.radius, 0, Math.PI*2, true);
+		this.ctx.arc(rx, ry, style.point.radius * this.scale, 0, Math.PI*2, true);
 		this.ctx.fill();
 		this.ctx.stroke();
 		this.ctx.restore();
@@ -362,7 +404,7 @@ Aristochart.line = {
 	line: function(style, points) {
 		this.ctx.save();
 		this.ctx.strokeStyle = style.line.stroke;
-		this.ctx.lineWidth = style.line.width;
+		this.ctx.lineWidth = style.line.width * this.scale;
 		this.ctx.beginPath();
 		this.ctx.moveTo(points[0].rx, points[0].ry);
 		var that = this;
@@ -394,20 +436,48 @@ Aristochart.line = {
 };
 
 Aristochart.ticks = {
-	line: function(style, point, type) {
+	line: function(style, x, y, type, i) {
 		this.ctx.save();
+		this.ctx.strokeStyle = "#000";
+		this.ctx.lineWidth = style.tick.width * this.scale;
 		this.ctx.beginPath();
-		this.ctx.moveTo(point.rx, point.ry);
+
+		var length = (i % 2 == 0) ? style.tick.major : style.tick.minor;
+			length *= this.scale;
+
+		// Sort out the alignment
+		var mx = x, my = y;
+		switch(style.tick.align) {
+			case "middle":
+				if(type == "x") my = y - (length/2);
+				if(type == "y") mx = x - (length/2);
+			break;
+
+			case "inside":
+				if(type == "x") my = y - length;
+				mx = x;
+			break;
+
+			case "outside":
+				if(type == "x") my = y;
+				if(type == "y") mx = x - length;
+			break;
+		}
+
+		this.ctx.moveTo(mx, my)
+
+		if(type == "x") this.ctx.lineTo(mx, my + length);
+		else this.ctx.lineTo(mx + length, my);
+		this.ctx.stroke();
 		this.ctx.restore();
-		//TODO
 	}
 };
 
 Aristochart.axes = {
 	line: function(style, x, y, x1, y1, type) {
 		this.ctx.save();
-		this.ctx.strokeStyle = style.axes.stroke;
-		this.ctx.lineWidth = style.axes.width;
+		this.ctx.strokeStyle = style.axis.stroke;
+		this.ctx.lineWidth = style.axis.width * this.scale;
 		this.ctx.beginPath();
 		this.ctx.moveTo(x, y);
 		this.ctx.lineTo(x1, y1);
@@ -416,10 +486,50 @@ Aristochart.axes = {
 	}
 };
 
+Aristochart.label = {
+	text: function(style, text, x, y, type) {
+		if(type == "x") y = y + (style.tick.major + style.label.offsetY)*this.scale;
+		if(type == "y") x = x - (style.tick.major + style.label.offsetX)*this.scale, y += style.label.offsetY*this.scale;
+
+		this.ctx.font = (style.label.fontSize * this.scale) + "px " + style.label.font;
+		this.ctx.textAlign = style.label.align;
+		this.ctx.textBaseline = style.label.baseline;
+
+		var substr = /(\d+(\.\d)?)/.exec(text);
+		this.ctx.fillText(substr[0], x, y);
+	}
+}
+
 Aristochart.themes = {};
 
 Aristochart.themes.orange = {
 	style: {
+		// Per graph styling
+		y1: {
+			color: "#f00",
+			point: {
+				fill: "#f00"
+			},
+
+			line: {
+				fill: "#df9036"
+			}
+		},
+
+		y2: {
+			color: "#f0f",
+			point: {
+				fill: "#f0f"
+			}
+		},
+
+		y3: {
+			color: "#00f",
+			point: {
+				color: "#00f"
+			}
+		},
+
 		default: {
 			line: {
 				stroke: "#332e2e",
@@ -434,7 +544,12 @@ Aristochart.themes.orange = {
 				radius: 3
 			},
 
-			axes: {
+			tick: {
+				align: "middle",
+				length: 8
+			},
+
+			axis: {
 				stroke: "rgba(0,0,0,0.3)",
 				width: 2
 			}
