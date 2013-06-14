@@ -1,5 +1,5 @@
 # Aristochart
-### Sophisticated and simplified Javascript 2D line charts
+### Sophisticated and simplified static Javascript 2D line charts
 Every find yourself looking for a chart library that isn't so damn huge and doesn't have any dependencies? I did too and couldn't find any so I decided to create my own. Aristochart is small but it's robust and made to be hacked. The main focus was customization so the library is incredibly extensible.
 
 ## Features
@@ -23,7 +23,13 @@ Aristochart has a simple enough interface. Simple plug in the canvas element (or
 
 ## TODO
 * Documentation.
-* Themes
+* Themes.
+
+## Theming
+Duplicate the `themes/default` and edit at will. All themes are merged with the defaults where the theme overwrites the defaults so any property omitted in the theme will still be present from the defaults. Take a screenshot and save it in your themes folder as `screenshot` and submit a pull request! All themes are welcome!
+
+### Concepts
+Every feature in Aristochart has a render function whereby the appropriate data is sent and it's up to that functio to render it on screen. Aristochart is more like a data manager and delegates the rendering to the appropriate functions. This table shows the parameters that are sent to the different functions.
 
 ## Themes
 Currently only one theme has been implemented so far.
