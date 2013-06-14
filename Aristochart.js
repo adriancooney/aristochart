@@ -1,10 +1,14 @@
 
 /**
+ * Aristochart.js
+ * 
  * I am sick of all those sucky-overcomplicated 2D charting libraries
  * This will be a basic ridiculously customizable library that makes
  * things simple.
- * 	
+ *
+ * @param {Object} element The DOM element container or canvas to use
  * @param {Object} options See Options.
+ * @param {Object} theme A theme object. See Aristochart.themes.
  */
 var Aristochart = function(element, options, theme) {
 	// Sort out the default parameters
@@ -14,6 +18,7 @@ var Aristochart = function(element, options, theme) {
 	if(!options || !options.data) throw new Error("Please provide some data to plot.");
 	if(!options.data.y || !options.data.x) throw new Error("Please provide some data.x and data.y");
 
+	// The default options.
 	this.defaults = {
 		width: 640,
 		height: 400,
@@ -71,24 +76,6 @@ var Aristochart = function(element, options, theme) {
 		},
 
 		style: {
-			y: {
-				line: {
-					stroke: "#298281"
-				}
-			},
-
-			y1: {
-				line: {
-					stroke: "#49bfbf"
-				}
-			},
-
-			y2: {
-				line: {
-					stroke: "#49bfd4"
-				}
-			},
-
 			default: {
 				point: {
 					stroke: "#000",
@@ -99,7 +86,7 @@ var Aristochart = function(element, options, theme) {
 				},
 
 				line: {
-					stroke: "#f00",
+					stroke: "#298281",
 					width: 3,
 					fill: "rgba(150, 215, 226, 0.4)"
 				},

@@ -1,10 +1,14 @@
+/**
+ * @theme Orange
+ * @author Adrian Cooney <cooney.adrian@gmail.com> (http://adriancooney.ie)
+ * @license http://opensource.org/licenses/MIT
+ */
 Aristochart.themes.orange = {
 	style: {
 		// Per graph styling
 		y1: {
-			color: "#f00",
 			point: {
-				fill: "#f00"
+				fill: "#f55939"
 			},
 
 			line: {
@@ -13,16 +17,14 @@ Aristochart.themes.orange = {
 		},
 
 		y2: {
-			color: "#f0f",
 			point: {
-				fill: "#f0f"
+				fill: "#f5d539"
 			}
 		},
 
 		y3: {
-			color: "#00f",
 			point: {
-				color: "#00f"
+				fill: "#00f"
 			}
 		},
 
@@ -30,7 +32,7 @@ Aristochart.themes.orange = {
 			line: {
 				stroke: "#332e2e",
 				width: 2,
-				fill: "#f59f39"
+				fill: "rgba(245, 159, 57, 0.5)"
 			},
 
 			point: {
