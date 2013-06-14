@@ -23,7 +23,7 @@ header nav li a {
   text-decoration: none;
 }
 header nav li a:hover {
-  color: #ff0;
+  color: #fff;
 }
 header h1 {
   float: left;
