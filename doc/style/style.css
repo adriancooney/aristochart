@@ -42,18 +42,17 @@ h2 {
   border-bottom: 1px solid #b2e7f1;
   margin: 18px 0;
 }
-.themes #holder,
-.themes #controls {
+.column {
   display: inline-block;
   vertical-align: top;
 }
-.themes #holder {
+.column.wide {
   width: 672px;
 }
-.themes #controls {
+.column.thin {
   width: 288px;
 }
-.themes #controls h2 {
+.themes h2 {
   margin: 34px 0 18px;
 }
 .themes #themes {

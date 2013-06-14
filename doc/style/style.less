@@ -62,23 +62,23 @@ h2 {
 	margin: 18px 0;
 }
 
+.column {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.column.wide {
+	width: @content_width * 0.7;
+}
+
+.column.thin {
+	width: @content_width * 0.3;
+}
+
 .themes {
-	#holder, #controls {
-		display: inline-block;
-		vertical-align: top;
 
-	}
-
-	#holder {
-		width: @content_width * 0.7;
-	}
-
-	#controls {
-		width: @content_width * 0.3;
-
-		h2 {
-			margin: 34px 0 18px;
-		}
+	h2 {
+		margin: 34px 0 18px;
 	}
 
 	#themes {
