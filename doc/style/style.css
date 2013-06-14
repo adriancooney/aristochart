@@ -27,6 +27,12 @@ header nav li a:hover {
 }
 header h1 {
   float: left;
+  color: #fc356c;
+  font-weight: bold;
+  font-size: 22px;
+  letter-spacing: -1px;
+  margin: 8px;
+  text-shadow: 2px 3px 0 #273137, 4px 5px 0 #c80339;
 }
 h2 {
   font-size: 18px;
@@ -34,6 +40,7 @@ h2 {
   padding: 4px;
   color: #30beda;
   border-bottom: 1px solid #b2e7f1;
+  margin: 18px 0;
 }
 .themes #holder,
 .themes #controls {
@@ -54,4 +61,16 @@ h2 {
   margin: 4px;
   margin-top: -4px;
   width: 86px;
+}
+.examples section li {
+  margin: 8px;
+  list-style: none;
+  font-weight: bold;
+  font-weight: 18px;
+}
+.examples section li a {
+  color: #273137;
+}
+.examples section li:before {
+  content: '\27dc  ';
 }

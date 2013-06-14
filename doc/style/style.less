@@ -44,6 +44,12 @@ header {
 
 	h1 {
 		float: left;
+		color: @red;
+		font-weight: bold;
+		font-size: 22px;
+		letter-spacing: -1px;
+		margin: 8px;
+		text-shadow: 2px 3px 0 @grey, 4px 5px 0 darken(@red, 20%);
 	}
 }
 
@@ -53,6 +59,7 @@ h2 {
 	padding: 4px;
 	color: @blue;
 	border-bottom: 1px solid lighten(@blue, 30%);
+	margin: 18px 0;
 }
 
 .themes {
@@ -79,5 +86,24 @@ h2 {
 		margin: 4px;
 		margin-top: -4px;
 		width: 86px;
+	}
+}
+
+.examples {
+	section {
+		li {
+			margin: 8px;
+			list-style: none;
+			font-weight: bold;
+			font-weight: 18px;
+
+			a {
+				color: @grey;
+			}
+		}
+
+		li:before {
+  			content: '\27dc  ';
+		}
 	}
 }
