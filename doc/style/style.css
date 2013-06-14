@@ -1,0 +1,57 @@
+@import url("reset.css");
+body {
+  font-family: Helvetica;
+}
+.wrapper {
+  width: 960px;
+  margin: 0 auto;
+}
+header {
+  background: #273137;
+  height: 40px;
+}
+header nav {
+  float: right;
+}
+header nav li {
+  display: inline-block;
+  margin: 13px 6px;
+}
+header nav li a {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+}
+header nav li a:hover {
+  color: #fff;
+}
+header h1 {
+  float: left;
+}
+h2 {
+  font-size: 18px;
+  font-weight: 100;
+  padding: 4px;
+  color: #30beda;
+  border-bottom: 1px solid #b2e7f1;
+}
+.themes #holder,
+.themes #controls {
+  display: inline-block;
+  vertical-align: top;
+}
+.themes #holder {
+  width: 672px;
+}
+.themes #controls {
+  width: 288px;
+}
+.themes #controls h2 {
+  margin: 34px 0 18px;
+}
+.themes #themes {
+  display: inline-block;
+  margin: 4px;
+  margin-top: -4px;
+  width: 85px;
+}

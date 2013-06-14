@@ -1,0 +1,83 @@
+@import url("reset.css");
+
+// Color palette gotten from the beautiful http://www.soundsupp.ly/
+@grey: #273137;
+@orange: #ff942d;
+@red: #fc356c;
+@white: #fff;
+@blue: #30beda;
+
+// Dimensions
+@content_width: 960px;
+
+body {
+	font-family: Helvetica;
+}
+
+.wrapper {
+	width: @content_width;
+	margin: 0 auto;
+}
+
+header {
+	background: @grey;
+	height: 40px;
+
+	nav {
+		float: right;
+
+		li {
+			display: inline-block;
+			margin: 13px 6px;
+
+			a {
+				font-size: 13px;
+				color: rgba(255,255,255,0.7);
+				text-decoration: none;
+			}
+
+			a:hover {
+				color: #fff;
+			}
+		}
+	}
+
+	h1 {
+		float: left;
+	}
+}
+
+h2 {
+	font-size: 18px;
+	font-weight: 100;
+	padding: 4px;
+	color: @blue;
+	border-bottom: 1px solid lighten(@blue, 30%);
+}
+
+.themes {
+	#holder, #controls {
+		display: inline-block;
+		vertical-align: top;
+
+	}
+
+	#holder {
+		width: @content_width * 0.7;
+	}
+
+	#controls {
+		width: @content_width * 0.3;
+
+		h2 {
+			margin: 34px 0 18px;
+		}
+	}
+
+	#themes {
+		display: inline-block;
+		margin: 4px;
+		margin-top: -4px;
+		width: 85px;
+	}
+}

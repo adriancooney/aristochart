@@ -18,6 +18,9 @@ var Aristochart = function(element, options, theme) {
 	if(!options || !options.data) throw new Error("Please provide some data to plot.");
 	if(!options.data.y || !options.data.x) throw new Error("Please provide some data.x and data.y");
 
+	// Edit some options
+	if(options.width && !options.height) options.height = Math.floor(options.width * 0.67);
+
 	// The default options.
 	this.defaults = {
 		width: 640,
