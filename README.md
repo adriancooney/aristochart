@@ -37,3 +37,6 @@ Every feature in Aristochart has a render function whereby the appropriate data 
 
 ### Orange
 ![Orange Theme](/themes/orange/screenshot.png "Orange")
+
+### Dot
+![Dot Theme](/themes/dot/screenshot.png "Dot")
