@@ -40,3 +40,6 @@ Every feature in Aristochart has a render function whereby the appropriate data 
 
 ### Dot
 ![Dot Theme](/themes/dot/screenshot.png "Dot")
+
+### Flat
+![Flat Theme](/themes/flat/screenshot.png "Flat")
