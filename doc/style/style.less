@@ -20,37 +20,64 @@ body {
 }
 
 header {
-	background: @grey;
-	height: 40px;
+	height: 60px;
+
+	.wrapper {
+		height: inherit;
+		border-bottom: 1px solid #ddd;
+	}
 
 	nav {
 		float: right;
 
 		li {
 			display: inline-block;
-			margin: 13px 6px;
+			margin: 22px 6px;
 
 			a {
-				font-size: 13px;
-				color: rgba(255,255,255,0.7);
+				font-size: 16px;
+				color: @grey;
 				text-decoration: none;
 			}
 
 			a:hover {
-				color: #fff;
+				text-decoration: underline;
 			}
+		}
+
+		.highlighted {
+			padding-bottom: 17px;
+			border-bottom: 4px solid @blue;
+		}
+
+		.github {
+			font-weight: bold;
 		}
 	}
 
 	h1 {
 		float: left;
-		color: @red;
+		color: @grey;
 		font-weight: bold;
-		font-size: 22px;
-		letter-spacing: -1px;
+		font-size: 36px;
+		letter-spacing: -3px;
 		margin: 8px;
-		text-shadow: 2px 3px 0 @grey, 4px 5px 0 darken(@red, 20%);
+
+		em {
+			font-family: Georia;
+			font-style: italic;
+			font-size: 118%;
+			letter-spacing: -2px;
+		}
 	}
+}
+
+h1 {
+	font-size: 48px;
+	font-weight: bold;
+	letter-spacing: -2px;
+	margin: 32px 0;
+	margin-top: 100px;
 }
 
 h2 {
@@ -60,6 +87,16 @@ h2 {
 	color: @blue;
 	border-bottom: 1px solid lighten(@blue, 30%);
 	margin: 18px 0;
+}
+
+h3 {
+	font-size: 24px;
+	font-family: Georgia;
+	font-weight: 100;
+	font-style: italic;
+	padding: 8px;
+	border-bottom: 1px solid #ccc;
+	margin-bottom: 6px;
 }
 
 .column {
@@ -75,10 +112,38 @@ h2 {
 	width: @content_width * 0.3;
 }
 
+code, pre {
+	margin: 30px;
+	background: rgba(0, 0, 0, 0.065);
+	border: 1px solid rgba(0, 0, 0, 0.12);
+	padding: 12px 18px;
+	font-family: monospace;
+	border-radius: 6px;
+	color: rgba(0,0,0,0.6);
+	overflow-x: scroll;
+}
+
+code {
+	padding: 2px 4px;
+	margin: 0;
+}
+
+p {
+	line-height: 150%;
+
+	a {
+		color: darken(@blue, 20%);
+	}
+}
+
 .themes {
 
+	.thin {
+		padding-top: 10px;
+	}
+
 	h2 {
-		margin: 34px 0 18px;
+		margin: 12px 0;
 	}
 
 	#themes {
@@ -89,21 +154,41 @@ h2 {
 	}
 }
 
-.examples {
-	section {
-		li {
-			margin: 8px;
-			list-style: none;
-			font-weight: bold;
-			font-weight: 18px;
+.links {
+	div {
+		margin: 14px 12px;
+		list-style: none;
+		font-weight: bold;
+		font-weight: 18px;
 
-			a {
-				color: @grey;
-			}
+		a {
+			color: @grey;
 		}
 
-		li:before {
-  			content: '\27dc  ';
+		span:before {
+			content: '\27dc  ';
 		}
 	}
+}
+
+.documentation {
+	#sidebar {
+		position: fixed;
+		margin-top: 14px;
+
+		h3 {
+			font-size: 18px;
+			margin-right: 18px;
+		}
+	}
+
+	.wide {
+		margin-left: @content_width * 0.3;
+	}
+}
+
+footer {
+	margin-top: 40px;
+	background: @grey;
+	height: 200px;
 }
