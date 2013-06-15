@@ -49,13 +49,19 @@
 	//Print the chart mustache!
 	var graph = new Aristochart(document.getElementById("holder"), {
 		width: 700,
-		step: 3,
+
+		axis: {
+			y: {
+				steps: 5,
+				min: 0
+			}
+		},
+
 		data: {
 			x: 10,
-			y: [20, 19, 18, 19, 18, 19, 20, 21, 20],
+			y: [20, 19, 18, 19, 18, 19, 20, 20, 20],
 			y1: [14, 11, 9, 8, 8, 8, 9, 11, 13, 11, 9, 8, 8, 8, 9, 11, 14],
 			y2: [14, 6, 3, 2, 2, 2, 4, 7, 4, 2, 2, 2, 3, 6, 14]
-
 		}
 	});
 </script>
