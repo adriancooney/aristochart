@@ -184,32 +184,25 @@ var Aristochart = function(element, options, theme) {
 		for(var key in this.options.style["default"]) 
 			this.options.style[style] = Aristochart.deepMerge(this.options.style["default"], this.options.style[style]);
 
-	// Feature specific options
-	if(!this.options.axis.x) this.options.axis.x = {};
-	if(!this.options.axis.x.render) this.options.axis.x.render = this.options.axis.render;
-	if(!this.options.axis.y) this.options.axis.y = {};
-	if(!this.options.axis.y.render) this.options.axis.y.render = this.options.axis.render;
-
 	// Sort out indexes
 	this.indexes = [], that = this;
 	["fill", "axis", "tick", "line", "point", "label", "title"].forEach(function(feature) {
-		//Set the index to the value
+		//Set the feature in the array at it's index
 		if(that.indexes[that.options[feature].index]) throw new Error("Conflicting indexes in Aristochart");
 		else that.indexes[that.options[feature].index] = feature;
 	});
 
-	//Filter out the undefineds
+	//Compress the array to just the indexes
 	this.indexes = this.indexes.filter(function(val) {
 		if(val) return true;
 	});
 
 	// Fix the x range
-	if(this.data.x.length == 1 || typeof this.data.x == "number") this.data.x = [0, this.data.x[0] || this.data.x];
-	else this.data.x = [this.data.x[0], this.data.x[this.data.x.length - 1]];
+	if(this.data.x.length == 1 || typeof this.data.x == "number") this.data.x = [0, this.data.x[0] || this.data.x, this.data.x];
+	else this.data.x = [this.data.x[0], this.data.x[this.data.x.length - 1], this.data.x];
 
-	// Calculate the step
+	// Calculate the x step
 	this.data.x.push(this.data.x[1]/this.options.axis.x.steps);
-
 
 	// Set the canvas
 	if(this.canvas.getContext) this.ctx = this.canvas.getContext("2d");
@@ -224,7 +217,7 @@ var Aristochart = function(element, options, theme) {
 	this.canvas.height = this.options.height;
 	this.canvas.width = this.options.width;
 
-	//Fix for retina
+	// Fix for retina and other screen resolutions
 	if(window.devicePixelRatio > 1) {
 		this.canvas.height = this.options.height * window.devicePixelRatio;
 		this.canvas.width = this.options.width * window.devicePixelRatio;
@@ -232,6 +225,7 @@ var Aristochart = function(element, options, theme) {
 		this.canvas.style.width = this.options.width + "px";
 	}
 
+	// Set the scale
 	this.scale = window.devicePixelRatio || 1;
 
 	// And render this bitch
@@ -432,6 +426,16 @@ Aristochart.prototype.iterateOverPoints = function(callback) {
  */
 Aristochart.prototype.normalize = function(val, axis) {
 	return val;
+};
+
+/**
+ * Converts canvas to image
+ * @return {Image} Image element with base64 encoded canvas
+ */
+Aristochart.prototype.toImage = function() {
+	var img = new Image();
+	img.src = this.canvas.toDataURL("image/png");
+	return img;
 };
 
 /**
