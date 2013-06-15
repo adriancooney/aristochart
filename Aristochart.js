@@ -268,6 +268,9 @@ Aristochart.prototype.refreshBounds = function() {
 			this.yMin = (min < this.yMin) ? min : this.yMin;
 		}
 	}
+
+	this.yMax = (this.options.axis.y.max == undefined) ? this.yMax : this.options.axis.y.max;
+	this.yMin = (this.options.axis.y.min == undefined) ? this.yMin : this.options.axis.y.min;
 }
 
 /**
@@ -297,8 +300,13 @@ Aristochart.prototype.render = function() {
 	var that = this,
 		lines = this.getPoints(),
 		defaults = that.options.style.default;
+
 	// Clear the canvas
 	this.canvas.width = this.canvas.width;
+
+	//Sanitize some variables
+	var stepX = Math.floor(that.options.axis.x.steps),
+		stepY = Math.floor(that.options.axis.y.steps);
 
 	// Iterate over indexes and render the features appropriately 
 	this.indexes.forEach(function(feature) {
@@ -329,9 +337,7 @@ Aristochart.prototype.render = function() {
 
 			case "tick":
 				if(defaults.tick.visible) {
-					var stepX = that.options.axis.x.steps,
-						stepY = that.options.axis.y.steps,
-						disX = that.box.x1/(stepX),
+					var disX = that.box.x1/(stepX),
 						disY = that.box.y1/(stepY);
 
 					for(var i = 0; i < (stepX + 1); i++) that.options.tick.render.call(that, defaults, that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
@@ -340,18 +346,19 @@ Aristochart.prototype.render = function() {
 			break;
 
 			case "label":
-					var stepX = that.options.axis.x.steps,
-						stepY = that.options.axis.y.steps,
-						disX = that.box.x1/(stepX),
+					var disX = that.box.x1/(stepX),
 						disY = that.box.y1/(stepY); 
 
 					if(defaults.label.x.visible)
 						for(var i = 0; i < (stepX + 1); i++) 
-							that.options.label.render.call(that, defaults, that.data.x[0] + ((that.data.x[1]/stepX) * i), that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
+							that.options.label.render.call(that, defaults, that.data.x[0] + (((that.data.x[1] - that.data.x[0])/stepX) * i), that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
 						
 					if(defaults.label.y.visible)
-						for(var i = 0; i < (stepY + 1); i++) 
-							that.options.label.render.call(that, defaults, that.yMax - (that.yMin + ((that.yMax/stepY) * i)), that.box.x - that.options.padding, that.box.y + (disY * i), "y", i);
+						for(var i = 0; i < (stepY + 1); i++) {
+							var pos = stepY - i,
+								label = that.yMin + ((that.yMax - that.yMin)/stepY) * pos; // Label sorting algorithm
+							that.options.label.render.call(that, defaults, label, that.box.x - that.options.padding, that.box.y + (disY * i), "y", i);
+						}
 
 			break;
 
@@ -556,7 +563,7 @@ Aristochart.label = {
 			this.ctx.textAlign = label.align;
 			this.ctx.textBaseline = label.baseline;
 
-			var substr = /(\d+(\.\d)?)/.exec(text);
+			var substr = /(\d+(\.\d)?)/.exec(text) || [];
 			this.ctx.fillText(substr[0], x, y);
 		}
 	}
