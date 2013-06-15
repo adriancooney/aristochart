@@ -6,25 +6,51 @@
 <body>
 	<header>
 		<div class="wrapper">
-			<h1>Aristochart</h1>
-			<h3>A Sophisticated 2D static graphing library.</h3>
+			<h1><em>Aristo</em>chart</h1>
 			<nav>
-				<li><a href="/">Home</a></li>
-				<li><a href="/doc/" class="highlighted">Documentation</a></li>
-				<li><a href="/example/">Examples</a></li>
-				<li><a href="/themes/">Themes</a></li>
+				<li><a href="../index.html">Home</a></li>
+				<li><a href="index.html" class="highlighted">Documentation</a></li>
+				<li><a href="../examples/index.html">Examples</a></li>
+				<li><a href="../themes/index.html">Themes</a></li>
+				<li><a href="https://github.com/dunxrion/aristochart" class="github">Github</a></li>
 			</nav>
 		</div>
 	</header>
-	<div class="content">
+	<div class="content documentation">
 		<div class="wrapper">
+			<div class="column thin links" id="sidebar">
+				<div><span><a href="#">General usage</a></span></div>
+				<div><span><a href="#">Themeing</a></span></div>
+				<div><span><a href="#">Data</a></span></div>
+				<div><span><a href="#">API</a></span>
+					<div><span><a href="#">Aristochart</a></span></div>
+				</div>
+			</div><div class="column wide">
+				<h2>General Usage</h2>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
+				<h2>General Usage</h2>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
+				<h2>General Usage</h2>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
+				<h2>General Usage</h2>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
+				<h2>General Usage</h2>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
+				<h2>General Usage</h2>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
+			</div>
 		</div>
 	</div>
 	<footer>
-		<div class="wrapper">
-		</div>
 	</footer>
 </body>
-<script src="../Aristochart.js" type="text/javascript"></script>
-<script type="text/javascript"></script>
+<script src="Aristochart.js" type="text/javascript"></script>
+<script type="text/javascript">
+	var sidebar = document.getElementById("sidebar");
+
+	window.addEventListener("scroll", function() {
+		var scroll = document.body.scrollTop < 0 ? 0 : document.body.scrollTop;
+		sidebar.style.marginTop = (scroll > 72 ? -60 : -(scroll) + 14) + "px";	
+	})
+</script>
 </html>

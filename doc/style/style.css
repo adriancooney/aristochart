@@ -7,32 +7,54 @@ body {
   margin: 0 auto;
 }
 header {
-  background: #273137;
-  height: 40px;
+  height: 60px;
+}
+header .wrapper {
+  height: inherit;
+  border-bottom: 1px solid #ddd;
 }
 header nav {
   float: right;
 }
 header nav li {
   display: inline-block;
-  margin: 13px 6px;
+  margin: 22px 6px;
 }
 header nav li a {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  color: #273137;
   text-decoration: none;
 }
 header nav li a:hover {
-  color: #fff;
+  text-decoration: underline;
+}
+header nav .highlighted {
+  padding-bottom: 17px;
+  border-bottom: 4px solid #30beda;
+}
+header nav .github {
+  font-weight: bold;
 }
 header h1 {
   float: left;
-  color: #fc356c;
+  color: #273137;
   font-weight: bold;
-  font-size: 22px;
-  letter-spacing: -1px;
+  font-size: 36px;
+  letter-spacing: -3px;
   margin: 8px;
-  text-shadow: 2px 3px 0 #273137, 4px 5px 0 #c80339;
+}
+header h1 em {
+  font-family: Georia;
+  font-style: italic;
+  font-size: 118%;
+  letter-spacing: -2px;
+}
+h1 {
+  font-size: 48px;
+  font-weight: bold;
+  letter-spacing: -2px;
+  margin: 32px 0;
+  margin-top: 100px;
 }
 h2 {
   font-size: 18px;
@@ -41,6 +63,15 @@ h2 {
   color: #30beda;
   border-bottom: 1px solid #b2e7f1;
   margin: 18px 0;
+}
+h3 {
+  font-size: 24px;
+  font-family: Georgia;
+  font-weight: 100;
+  font-style: italic;
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 6px;
 }
 .column {
   display: inline-block;
@@ -52,8 +83,32 @@ h2 {
 .column.thin {
   width: 288px;
 }
+code,
+pre {
+  margin: 30px;
+  background: rgba(0, 0, 0, 0.065);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 12px 18px;
+  font-family: monospace;
+  border-radius: 6px;
+  color: rgba(0, 0, 0, 0.6);
+  overflow-x: scroll;
+}
+code {
+  padding: 2px 4px;
+  margin: 0;
+}
+p {
+  line-height: 150%;
+}
+p a {
+  color: #19788b;
+}
+.themes .thin {
+  padding-top: 10px;
+}
 .themes h2 {
-  margin: 34px 0 18px;
+  margin: 12px 0;
 }
 .themes #themes {
   display: inline-block;
@@ -61,15 +116,31 @@ h2 {
   margin-top: -4px;
   width: 86px;
 }
-.examples section li {
-  margin: 8px;
+.links div {
+  margin: 14px 12px;
   list-style: none;
   font-weight: bold;
   font-weight: 18px;
 }
-.examples section li a {
+.links div a {
   color: #273137;
 }
-.examples section li:before {
+.links div span:before {
   content: '\27dc  ';
+}
+.documentation #sidebar {
+  position: fixed;
+  margin-top: 14px;
+}
+.documentation #sidebar h3 {
+  font-size: 18px;
+  margin-right: 18px;
+}
+.documentation .wide {
+  margin-left: 288px;
+}
+footer {
+  margin-top: 40px;
+  background: #273137;
+  height: 200px;
 }
