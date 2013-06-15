@@ -116,6 +116,16 @@ table tr:last-child th,
 table tr:last-child td {
   border-bottom: none;
 }
+.button {
+  display: inline-block;
+  background: #30beda;
+  padding: 8px 14px;
+  color: #fff;
+  text-decoration: none;
+  margin: 8px;
+  font-weight: bold;
+  font-size: 20px;
+}
 header {
   height: 60px;
 }
@@ -207,4 +217,28 @@ footer p a {
 }
 .documentation .wide {
   margin-left: 288px;
+}
+.home .features .wide h3 {
+  margin-right: 14px;
+}
+.home .download {
+  margin-top: 32px;
+  text-align: center;
+}
+.home .download .button:first-child {
+  padding: 14px 17px;
+  margin-bottom: 0;
+  width: 230px;
+  font-size: 19px;
+}
+.home .download .button:nth-child(2) {
+  background: #1d8ba1;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: normal;
+  width: 82%;
+  margin-top: 0;
+}
+.home .download p {
+  color: rgba(0, 0, 0, 0.6);
 }

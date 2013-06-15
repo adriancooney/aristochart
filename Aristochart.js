@@ -348,6 +348,7 @@ Aristochart.prototype.render = function() {
 					if(defaults.label.x.visible)
 						for(var i = 0; i < (stepX + 1); i++) 
 							that.options.label.render.call(that, defaults, that.data.x[0] + ((that.data.x[1]/stepX) * i), that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
+						
 					if(defaults.label.y.visible)
 						for(var i = 0; i < (stepY + 1); i++) 
 							that.options.label.render.call(that, defaults, that.yMax - (that.yMin + ((that.yMax/stepY) * i)), that.box.x - that.options.padding, that.box.y + (disY * i), "y", i);

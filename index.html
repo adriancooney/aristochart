@@ -16,7 +16,7 @@
 			</nav>
 		</div>
 	</header>
-	<div class="content themes">
+	<div class="content home">
 		<div class="wrapper">
 			<section>
 				<div  class="column wide" id="holder">
@@ -24,16 +24,22 @@
 					<h1>Simple <br>and <em>sophisticated</em> static <br>2D<br> line charts.</h1>
 				</div>
 			</section>
-			<section>
-				<div  class="column wide">
+			<section class="features">
+				<div class="column wide">
 					<h3>Features</h3>
-					<p>
+				</div><div class="column thin">
+					<div class="download">
+						<a class="button" href="https://raw.github.com/dunxrion/aristochart/master/Aristochart.js">Download Aristochart.js</a>
+						<a class="button" href="https://github.com/dunxrion/aristochart/archive/master.zip">Download docs, examples, themes</a>
+						<p>Hosted on <a href="https://github.com/dunxrion/aristochart" class="github">Github</a></p>
+					</div>
 				</div>
 			</section>
 		</div>
 	</div>
 	<footer>
 		<div class="wrapper">
+			<p>An open-source project by <a href="http://adriancooney.ie">Adrian Cooney</a>.</p>
 		</div>
 	</footer>
 </body>
@@ -41,8 +47,9 @@
 
 <script type="text/javascript">
 	//Print the chart mustache!
-	new Aristochart(document.getElementById("holder"), {
+	var graph = new Aristochart(document.getElementById("holder"), {
 		width: 700,
+		step: 3,
 		data: {
 			x: 10,
 			y: [20, 19, 18, 19, 18, 19, 20, 21, 20],
