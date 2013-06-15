@@ -25,6 +25,8 @@
 				<select id="themes">
 					<option>Default</option>
 					<option>Orange</option>
+					<option>Dot</option>
+					<option>Flat</option>
 				</select></p>
 				<h2>Themeing</h2>
 				<p>Themeing in Aristochart was designed to be as simple as possible. Each theme is an object with properties overriding the default theme. Themes can also override the render functions and implement their own. For example, if you wanted a star instead of a circle for points, you can override the <code>point.render</code> with your own function. To get started, duplicate the <code>default</code> theme in the <code>themes</code> folder and check out <a href="https://github.com/dunxrion/aristochart">README.md</a>.</p>
@@ -39,6 +41,8 @@
 <script src="../Aristochart.js" type="text/javascript"></script>
 <!-- Import the themes -->
 <script src="../themes/orange/orange.js" type="text/javascript"></script>
+<script src="../themes/dot/dot.js" type="text/javascript"></script>
+<script src="../themes/flat/flat.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 	function chart(theme) {

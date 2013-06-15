@@ -30,7 +30,8 @@ var Aristochart = function(element, options, theme) {
 
 		fill: {
 			index: 0,
-			render: Aristochart.line.fill
+			render: Aristochart.line.fill,
+			fillToBaseLine: true,
 		},
 
 		axis: {
@@ -91,12 +92,22 @@ var Aristochart = function(element, options, theme) {
 				line: {
 					stroke: "#298281",
 					width: 3,
-					fill: "rgba(150, 215, 226, 0.4)"
+					fill: "rgba(150, 215, 226, 0.4)",
+					visible: true
 				},
 
 				axis: {
 					stroke: "#ddd",
-					width: 3
+					width: 3,
+					visible: true,
+
+					x: {
+						visible: true
+					},
+
+					y: {
+						visible: true
+					}
 				},
 
 				tick: {
@@ -104,7 +115,8 @@ var Aristochart = function(element, options, theme) {
 					stroke: "#ddd",
 					width: 2,
 					minor: 10,
-					major: 15
+					major: 15,
+					visible: true
 				},
 
 				label: {
@@ -116,7 +128,8 @@ var Aristochart = function(element, options, theme) {
 						align: "center",
 						baseline: "bottom",
 						offsetY: 8,
-						offsetX: 3
+						offsetX: 3,
+						visible: true
 					},
 
 					y: {
@@ -127,7 +140,8 @@ var Aristochart = function(element, options, theme) {
 						align: "center",
 						baseline: "bottom",
 						offsetY: 8,
-						offsetX: 8
+						offsetX: 8,
+						visible: true
 					}
 				},
 
@@ -136,15 +150,18 @@ var Aristochart = function(element, options, theme) {
 					font: "georgia",
 					fontSize: "16",
 					fontStyle: "italic",
+					visible: true,
 
 					x: {
 						offsetX: 0,
-						offsetY: 120
+						offsetY: 120,
+						visible: true
 					},
 
 					y: {
 						offsetX: -135,
-						offsetY: 10
+						offsetY: 10,
+						visible: true
 					}
 				}
 			}
@@ -232,7 +249,7 @@ Aristochart.deepMerge = function(defaults, options) {
 	// Used "defaults" and "options" to help with the concept in my head
 	return (function recur(defaults, options) {
 		for(var key in defaults) {
-			if(!options[key]) options[key] = defaults[key];
+			if(options[key] == undefined) options[key] = defaults[key];
 			else if(defaults[key] instanceof Object) options[key] = recur(defaults[key], options[key]);
 		}
 		return options;
@@ -299,52 +316,64 @@ Aristochart.prototype.render = function() {
 			break;
 
 			case "axis":
-				var padding = that.options.padding,
-					box = that.box;
-				that.options.axis.x.render.call(that, defaults, box.x - padding, box.y + box.y1 + padding, that.box.x + box.x1 + padding, box.y + box.y1 + padding, "x");
-				that.options.axis.y.render.call(that, defaults, box.x - padding, box.y - padding, box.x - padding, box.y + box.y1 + padding, "y");
+				if(defaults.axis.visible) {
+					var padding = that.options.padding,
+						box = that.box;
+					if(defaults.axis.x.visible) that.options.axis.x.render.call(that, defaults, box.x - padding, box.y + box.y1 + padding, that.box.x + box.x1 + padding, box.y + box.y1 + padding, "x");
+					if(defaults.axis.y.visible) that.options.axis.y.render.call(that, defaults, box.x - padding, box.y - padding, box.x - padding, box.y + box.y1 + padding, "y");
+				}
 			break;
 
 			case "line":
-				for(var line in lines)
-					that.options.line.render.call(that, that.options.style[line] || defaults, lines[line]);
+				for(var line in lines) {
+					var style = that.options.style[line] || defaults;
+					if(style.line.visible) that.options.line.render.call(that, style, lines[line]);
+				}
 			break;
 
 			case "tick":
-				var stepX = that.options.axis.x.steps,
-					stepY = that.options.axis.y.steps,
-					disX = that.box.x1/(stepX),
-					disY = that.box.y1/(stepY);
+				if(defaults.tick.visible) {
+					var stepX = that.options.axis.x.steps,
+						stepY = that.options.axis.y.steps,
+						disX = that.box.x1/(stepX),
+						disY = that.box.y1/(stepY);
 
-				for(var i = 0; i < (stepX + 1); i++) that.options.tick.render.call(that, defaults, that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
-				for(var i = 0; i < (stepY + 1); i++) that.options.tick.render.call(that, defaults, that.box.x - that.options.padding, that.box.y + (disY * i), "y", i);
+					for(var i = 0; i < (stepX + 1); i++) that.options.tick.render.call(that, defaults, that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
+					for(var i = 0; i < (stepY + 1); i++) that.options.tick.render.call(that, defaults, that.box.x - that.options.padding, that.box.y + (disY * i), "y", i);
+				}
 			break;
 
 			case "label":
-				var stepX = that.options.axis.x.steps,
-					stepY = that.options.axis.y.steps,
-					disX = that.box.x1/(stepX),
-					disY = that.box.y1/(stepY); 
+					var stepX = that.options.axis.x.steps,
+						stepY = that.options.axis.y.steps,
+						disX = that.box.x1/(stepX),
+						disY = that.box.y1/(stepY); 
 
-				for(var i = 0; i < (stepX + 1); i++) 
-					that.options.label.render.call(that, defaults, that.data.x[0] + ((that.data.x[1]/stepX) * i), that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
-				for(var i = 0; i < (stepY + 1); i++) 
-					that.options.label.render.call(that, defaults, that.yMax - (that.yMin + ((that.yMax/stepY) * i)), that.box.x - that.options.padding, that.box.y + (disY * i), "y", i);
+					if(defaults.label.x.visible)
+						for(var i = 0; i < (stepX + 1); i++) 
+							that.options.label.render.call(that, defaults, that.data.x[0] + ((that.data.x[1]/stepX) * i), that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
+					if(defaults.label.y.visible)
+						for(var i = 0; i < (stepY + 1); i++) 
+							that.options.label.render.call(that, defaults, that.yMax - (that.yMin + ((that.yMax/stepY) * i)), that.box.x - that.options.padding, that.box.y + (disY * i), "y", i);
 
 			break;
 
 			case "fill":
-				for(var line in lines)
-					that.options.fill.render.call(that, defaults, lines[line]);
+					for(var line in lines) {
+						var style = that.options.style[line] || defaults;
+						if(style.line.fill) that.options.fill.render.call(that, style, lines[line]);
+					}
 			break;
 
 			case "title":
-				// X an y title
-				var xLabel = that.options.title.x,
-					yLabel = that.options.title.y;
+				if(defaults.title.visible) {
+					// X an y title
+					var xLabel = that.options.title.x,
+						yLabel = that.options.title.y;
 
-				that.options.title.render.call(that, defaults, xLabel, (that.box.x*2 + that.box.x1)/2, that.box.y + that.box.y1, "x");
-				that.options.title.render.call(that, defaults, yLabel, (that.box.x), (that.box.y*2 + that.box.y1)/2, "y");
+					if(defaults.title.x.visible) that.options.title.render.call(that, defaults, xLabel, (that.box.x*2 + that.box.x1)/2, that.box.y + that.box.y1, "x");
+					if(defaults.title.y.visible) that.options.title.render.call(that, defaults, yLabel, (that.box.x), (that.box.y*2 + that.box.y1)/2, "y");
+				}
 			break;
 		}
 	});
@@ -448,8 +477,8 @@ Aristochart.line = {
 		});
 
 		//Find bounding box
-		this.ctx.lineTo(points[points.length - 1].rx, this.box.y + this.box.y1 + this.options.padding);
-		this.ctx.lineTo(points[0].rx, this.box.y + this.box.y1 + this.options.padding);
+		this.ctx.lineTo(points[points.length - 1].rx, this.box.y + this.box.y1 + ((this.options.fill.fillToBaseLine) ? this.options.padding : 0));
+		this.ctx.lineTo(points[0].rx, this.box.y + this.box.y1 + ((this.options.fill.fillToBaseLine) ? this.options.padding : 0));
 		this.ctx.closePath();
 		this.ctx.fill();
 		this.ctx.restore();
@@ -460,7 +489,7 @@ Aristochart.line = {
 Aristochart.ticks = {
 	line: function(style, x, y, type, i) {
 		this.ctx.save();
-		this.ctx.strokeStyle = "#000";
+		this.ctx.strokeStyle = style.tick.stroke;
 		this.ctx.lineWidth = style.tick.width * this.scale;
 		this.ctx.beginPath();
 
