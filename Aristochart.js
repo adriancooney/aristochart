@@ -569,7 +569,7 @@ Aristochart.label = {
 			this.ctx.textAlign = label.align;
 			this.ctx.textBaseline = label.baseline;
 
-			var substr = /(\d+(\.\d)?)/.exec(text) || [];
+			var substr = /(\-?\d+(\.\d)?)/.exec(text) || [];
 			this.ctx.fillText(substr[0], x, y);
 		}
 	}
