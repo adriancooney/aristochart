@@ -19,32 +19,56 @@
 	<div class="content documentation">
 		<div class="wrapper">
 			<div class="column thin links" id="sidebar">
-				<div><span><a href="#">General usage</a></span></div>
-				<div><span><a href="#">Themeing</a></span></div>
-				<div><span><a href="#">Data</a></span></div>
-				<div><span><a href="#">API</a></span>
-					<div><span><a href="#">Aristochart</a></span></div>
+				<div><span><a href="#general">General</a></span></div>
+				<div><span><a href="#theming">Themeing</a></span></div>
+				<div><span><a href="#data">Data</a></span></div>
+				<div><span><a href="#api">API</a></span>
+					<div><span><a href="#api.constructor">Aristochart</a></span></div>
 				</div>
+				<div><span><a href="#changelog">Changelog</a></span></div>
 			</div><div class="column wide">
-				<h2>General Usage</h2>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
-				<h2>General Usage</h2>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
-				<h2>General Usage</h2>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
-				<h2>General Usage</h2>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
-				<h2>General Usage</h2>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
-				<h2>General Usage</h2>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam, amet voluptatem consectetur dignissimos eaque ex accusantium labore nobis itaque repellat. Perferendis, debitis, saepe doloremque impedit ipsam sed pariatur esse ex!</p>
+				<h2>General</h2>
+				<p>Aristochart works by rendering graph data onto the <span class="tag">canvas</span> element. Canvas is fast and requires little CPU to render onceThis brings up the question of browser compatibility. Currently <a href="http://caniuse.com/canvas">all major browsers support the canvas element</a> but IE 6, 7 and 8 are left out in the cold. There are no plans to support these browsers in the near future.</p>
+
+				<h2>Themeing</h2>
+				<p>Aristochart itself is more of a data manager, it's the theme that takes control of rendering the data on screen. Aristochart comes with a default set of render functions, each of which can be overridden by a theme. Below is a list of features that can be implemented by the theme and the data that is sent to each feature's render function.</p>
+				<table>
+					<tr>
+						<th>Feature</th><th>Description</th><th>Parameters</th>
+					</tr>
+					<tr>
+						<td>Point</td>
+						<td><p>A point on the graph.</p></td>
+						<td><p>style <em>Style object</em>, rx <em>Raster coord x</em>, ry <em>Raster coord y</em>, x <em>Data x</em>, y <em>Data y</em>, graph <em>Line Name</em></p></td>
+					</tr>
+					<tr>
+						<td>Axis</td>
+						<td><p>The graph's axis lines</p></td>
+						<td><p>style <em>Style object</em>, x <em>Start of the line x coord</em>, y <em>Start of the line y coord</em>, x1 <em>End of the line x coord</em>, y1 <em>End of the line y coord</em>, type <em>Axis type</em></p></td>
+					</tr>
+					<tr>
+						<td>Line</td>
+						<td><p>The graph's lines</p></td>
+						<td><p>style <em>Style object</em>, points <em>An array of Points <code>{rx, ry, x, y}</code></em></p></td>
+					</tr>
+				</table>
+				<h2>Roadmap</h2>
+				<ul>
+					<li>Expand to pie charts, histograms etc.</li>
+				</ul>
+
+				<h2>Changelog</h2>
+				<p>Initial Release: <span class="version">v0.1</span></p>
 			</div>
 		</div>
 	</div>
 	<footer>
+		<div class="wrapper">
+			<p>An open-source project by <a href="http://adriancooney.ie">Adrian Cooney</a>.</p>
+		</div>
 	</footer>
 </body>
-<script src="Aristochart.js" type="text/javascript"></script>
+<script src="../Aristochart.js" type="text/javascript"></script>
 <script type="text/javascript">
 	var sidebar = document.getElementById("sidebar");
 

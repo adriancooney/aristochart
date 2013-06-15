@@ -38,11 +38,13 @@ var Aristochart = function(element, options, theme) {
 			index: 1,
 			render: Aristochart.axes.line,
 			x: {
-				steps: 5
+				steps: 5,
+				render: Aristochart.axes.line,
 			},
 
 			y: {
-				steps: 10
+				steps: 10,
+				render: Aristochart.axes.line,
 			}
 		},
 

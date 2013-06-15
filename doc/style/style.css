@@ -6,49 +6,6 @@ body {
   width: 960px;
   margin: 0 auto;
 }
-header {
-  height: 60px;
-}
-header .wrapper {
-  height: inherit;
-  border-bottom: 1px solid #ddd;
-}
-header nav {
-  float: right;
-}
-header nav li {
-  display: inline-block;
-  margin: 22px 6px;
-}
-header nav li a {
-  font-size: 16px;
-  color: #273137;
-  text-decoration: none;
-}
-header nav li a:hover {
-  text-decoration: underline;
-}
-header nav .highlighted {
-  padding-bottom: 17px;
-  border-bottom: 4px solid #30beda;
-}
-header nav .github {
-  font-weight: bold;
-}
-header h1 {
-  float: left;
-  color: #273137;
-  font-weight: bold;
-  font-size: 36px;
-  letter-spacing: -3px;
-  margin: 8px;
-}
-header h1 em {
-  font-family: Georia;
-  font-style: italic;
-  font-size: 118%;
-  letter-spacing: -2px;
-}
 h1 {
   font-size: 48px;
   font-weight: bold;
@@ -104,6 +61,118 @@ p {
 p a {
   color: #19788b;
 }
+p .tag {
+  color: #fc356c;
+  font-family: monospace;
+  font-size: 120%;
+}
+p .tag:before {
+  content: '<';
+}
+p .tag:after {
+  content: '>';
+}
+p .version {
+  font-family: monospace;
+  font-size: 120%;
+  color: #ff942d;
+}
+ul li {
+  list-style-type: disc;
+  margin-left: 18px;
+}
+table {
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  margin: 18px 0;
+}
+table th,
+table td {
+  padding: 8px;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+table th {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.5);
+}
+table th:last-child,
+table td:last-child {
+  border-right: none;
+}
+table tr td:first-child {
+  text-align: center;
+}
+table tr td:last-child {
+  font-family: monospace;
+  font-size: 110%;
+  color: #19788b;
+}
+table tr td:last-child em {
+  font-family: Helvetica;
+  font-size: 90%;
+  color: #000;
+}
+table tr:last-child th,
+table tr:last-child td {
+  border-bottom: none;
+}
+header {
+  height: 60px;
+}
+header .wrapper {
+  height: inherit;
+  border-bottom: 1px solid #ddd;
+}
+header nav {
+  float: right;
+}
+header nav li {
+  display: inline-block;
+  margin: 22px 6px;
+}
+header nav li a {
+  font-size: 16px;
+  color: #273137;
+  text-decoration: none;
+}
+header nav li a:hover {
+  text-decoration: underline;
+}
+header nav .highlighted {
+  padding-bottom: 17px;
+  border-bottom: 4px solid #30beda;
+}
+header nav .github {
+  font-weight: bold;
+}
+header h1 {
+  float: left;
+  color: #273137;
+  font-weight: bold;
+  font-size: 36px;
+  letter-spacing: -3px;
+  margin: 8px;
+}
+header h1 em {
+  font-family: Georia;
+  font-style: italic;
+  font-size: 118%;
+  letter-spacing: -2px;
+}
+footer {
+  margin-top: 40px;
+  background: #273137;
+  height: 200px;
+}
+footer p {
+  color: #839aa7;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+footer p a {
+  color: #219eb6;
+}
 .themes .thin {
   padding-top: 10px;
 }
@@ -138,9 +207,4 @@ p a {
 }
 .documentation .wide {
   margin-left: 288px;
-}
-footer {
-  margin-top: 40px;
-  background: #273137;
-  height: 200px;
 }
