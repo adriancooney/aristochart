@@ -2,14 +2,13 @@
 <head>
 	<title>Big Data Example Aristochart</title>
     <script src="../../Aristochart.js"></script>
-    <script src="../../themes/orange/orange.js"></script>
 </head>
 <body>
-<p>10000 data points between 0, 50</p>
+<p>100,000 data points between 0, 50</p>
 </body>
 <script type="text/javascript">
 	var bigdata = [25];
-	for(var i = 1; i < 500; i++) bigdata.push(bigdata[i - 1] + (Math.random() * ((Math.random() > 0.5) ? -1 : 1)));
+	for(var i = 1; i < 100000; i++) bigdata.push(bigdata[i - 1] + (Math.random() * ((Math.random() > 0.5) ? -1 : 1)));
 
 	window.graph = new Aristochart(document.body, {
 		style: {

@@ -395,26 +395,41 @@ Aristochart.prototype.render = function() {
  * @return {Object}            The lines store <name> : <point array> where a point is {rx (raster x), ry, x (actual x point), y}
  */
 Aristochart.prototype.getPoints = function(callback) {
-	var lines = {};
+	var lines = {},
+		Xmax = this.x.max,
+		Ymax = this.y.max,
+		bx = this.box.x,
+		by = this.box.y,
+		bx1 = this.box.x1,
+		by1 = this.box.y1; //Caching these variables in case of large datasets
 
 	//Iterate over y1, y2 etc.
 	for(var key in this.data) {
 		if(key !== "x") {
 			lines[key] = [];
-			var currArr = this.data[key];
-			for(var i = 0, cache = this.data[key].length; i < cache; i++) {
-				var currArr = this.data[key],
-					currY = currArr[i],
+			var currArr = this.data[key],
+				length = currArr.length,
+				factor = 1;
 
-					x = (this.x.max/(currArr.length - 1)) * i,
+			// Compensate for HUGE data set, only take a few data points
+			if(length > 1000) factor = 5;
+			if(length > 10000) factor = 50;
+			if(length > 100000) factor = 5000;
+
+			var count = length/factor;
+
+			for(var i = 0; i < count; i++) {
+				var currY = currArr[i],
+
+					x = (Xmax/(count - 1)) * i,
 					y = currArr[i],
 
 					x = this.normalize(x),
 					y = this.normalize(y),
 
 					// Calculate the raster points
-					rx = this.box.x + (this.box.x1*(x/this.x.max));
-					ry = this.box.y + (this.box.y1 - (this.box.y1*(y/this.y.max)));
+					rx = bx + (bx1*(x/Xmax));
+					ry = by + (by1 - (by1*(y/Ymax)));
 
 				lines[key].push({x: x, y: y, rx: rx, ry: ry});
 

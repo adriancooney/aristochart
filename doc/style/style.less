@@ -52,11 +52,15 @@ h3 {
 }
 
 .column.wide {
-	width: @content_width * 0.7;
+	width: 70%;
 }
 
 .column.thin {
-	width: @content_width * 0.3;
+	width: 30%;
+}
+
+.column.half {
+	width: 50%;
 }
 
 code, pre {
@@ -235,6 +239,18 @@ footer {
 	}
 }
 
+.examples {
+	min-height: 400px;
+
+	span {
+		font-weight: normal;
+
+		a {
+			font-weight: bold;
+		}
+	}
+}
+
 .themes {
 
 	.thin {
@@ -287,6 +303,9 @@ footer {
 }
 
 .home {
+	.flap-active {
+		-webkit-transform: translate(0, 0);
+	}
 
 	.features {
 		.wide {
@@ -297,7 +316,6 @@ footer {
 	}
 
 	.download {
-		margin-top: 32px;
 		text-align: center;
 
 		.button:first-child {
@@ -318,6 +336,20 @@ footer {
 
 		p {
 			color: rgba(0,0,0,0.6);
+		}
+	}
+
+	ul {
+		margin: 16px 0;
+
+		li {
+			list-style: none;
+			font-size: 16px;
+			margin: 4px;
+		}
+
+		li:before {
+			content: '\27dc  ';
 		}
 	}
 }

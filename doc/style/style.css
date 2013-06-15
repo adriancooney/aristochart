@@ -35,10 +35,13 @@ h3 {
   vertical-align: top;
 }
 .column.wide {
-  width: 672px;
+  width: 70%;
 }
 .column.thin {
-  width: 288px;
+  width: 30%;
+}
+.column.half {
+  width: 50%;
 }
 code,
 pre {
@@ -183,6 +186,15 @@ footer p {
 footer p a {
   color: #219eb6;
 }
+.examples {
+  min-height: 400px;
+}
+.examples span {
+  font-weight: normal;
+}
+.examples span a {
+  font-weight: bold;
+}
 .themes .thin {
   padding-top: 10px;
 }
@@ -218,11 +230,13 @@ footer p a {
 .documentation .wide {
   margin-left: 288px;
 }
+.home .flap-active {
+  -webkit-transform: translate(0, 0);
+}
 .home .features .wide h3 {
   margin-right: 14px;
 }
 .home .download {
-  margin-top: 32px;
   text-align: center;
 }
 .home .download .button:first-child {
@@ -241,4 +255,15 @@ footer p a {
 }
 .home .download p {
   color: rgba(0, 0, 0, 0.6);
+}
+.home ul {
+  margin: 16px 0;
+}
+.home ul li {
+  list-style: none;
+  font-size: 16px;
+  margin: 4px;
+}
+.home ul li:before {
+  content: '\27dc  ';
 }
