@@ -129,6 +129,9 @@ table tr:last-child td {
   font-weight: bold;
   font-size: 20px;
 }
+.back {
+  float: right;
+}
 header {
   height: 60px;
 }
@@ -194,6 +197,13 @@ footer p a {
 }
 .examples span a {
   font-weight: bold;
+}
+.examples #holder {
+  text-align: center;
+}
+.examples pre {
+  margin-right: 0;
+  margin-left: 0;
 }
 .themes .thin {
   padding-top: 10px;
