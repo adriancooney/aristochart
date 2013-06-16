@@ -1,0 +1,65 @@
+<html>
+<head>
+	<title>toImage Example</title>
+	<link href="../../doc/style/style.css" rel="stylesheet" type="text/css" />
+	<script src="../../doc/script/Sintax.js" type="text/javascript"></script>
+	<script src="../../doc/script/Examples.js" type="text/javascript"></script>
+</head>
+<!-- Example checklist:
+	Edited the head's title?
+	Edited the description paragraph? (#description)
+	Added your example's code to the script tag below with the id 'example-code'?
+	Renamed parent folder to the examples name? 
+	Added it to the example list in examples/index.html?
+	Submitted a pull request?
+
+	Don't be afraid to change the layout but try to maintain some sort of continuity.
+-->
+<body>
+	<header>
+		<div class="wrapper">
+			<h1><em>Aristo</em>chart</h1>
+			<nav>
+				<li><a href="../../index.html">Home</a></li>
+				<li><a href="../../doc/index.html">Documentation</a></li>
+				<li><a href="../index.html" class="highlighted">Examples</a></li>
+				<li><a href="../../themes/index.html">Themes</a></li>
+				<li><a href="https://github.com/dunxrion/aristochart" class="github">Github</a></li>
+			</nav>
+		</div>
+	</header>
+	<div class="content examples">
+		<div class="wrapper">
+			<p class="back"><a href="../index.html">&larr; Back to examples</a></p>
+			<h2>Description</h2>
+			<p id="description">Demonstrates the usage of <code>&lt;instance>.toImage()</code>.</p>
+			<h2>Code</h2>
+			<pre id="input-code"></pre>
+			<h2>Output</h2>
+			<div id="holder"></div>
+		</div>
+	</div>
+	<footer>
+		<div class="wrapper">
+			<p>An open-source project by <a href="http://adriancooney.ie">Adrian Cooney</a>.</p>
+		</div>
+	</footer>
+</body>
+<!-- You edit below this line -->
+<script src="../../Aristochart.js" type="text/javascript"></script>
+<script type="text/javascript" id="example-code">
+// Add your example
+var holder = document.getElementById("holder");
+
+var graph = new Aristochart(holder, {
+	data: {
+		x: 10,
+		y: [0, 1, 2, 3, 4, 5, 6, 6, 5, 4, 3, 3, 4, 5, 6, 7, 8, 9, 10],
+		y1: [10, 9, 8, 7, 7, 6, 2, 1, 1, 1],
+		y2: [4, 4, 4, 3, 3, 2, 2, 1, 0, 0, 0, 0]
+	},
+
+	render: false
+});
+</script>
+</html>

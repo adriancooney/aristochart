@@ -78,7 +78,7 @@ var Aristochart = function(element, options, theme) {
 	this.resolution = window.devicePixelRatio || 1;
 
 	// And render this bitch
-	this.render();
+	if(this.options.render) this.render();
 };
 
 /**
@@ -502,7 +502,8 @@ Aristochart.themes.default = {
 	width: 640,
 	height: 400,
 	margin: 70,
-	padding: 20,	
+	padding: 20,
+	render: true, //Automatically render
 
 	fill: {
 		index: 0,
