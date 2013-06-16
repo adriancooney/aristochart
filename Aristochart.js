@@ -37,14 +37,17 @@ var Aristochart = function(element, options, theme) {
 		axis: {
 			index: 1,
 			render: Aristochart.axes.line,
+
 			x: {
 				steps: 5,
 				render: Aristochart.axes.line,
+				fixed: false,
 			},
 
 			y: {
 				steps: 10,
 				render: Aristochart.axes.line,
+				fixed: false
 			}
 		},
 
@@ -304,7 +307,11 @@ Aristochart.prototype.render = function() {
 	this.refreshBounds();
 
 	var that = this,
-		lines = this.getPoints(),
+
+		//Get the data
+		data = this.getPoints(),
+		lines = data.lines,
+		origin = data.origin,
 		defaults = that.options.style.default;
 
 	// Clear the canvas
@@ -313,6 +320,29 @@ Aristochart.prototype.render = function() {
 	//Sanitize some variables
 	var stepX = Math.floor(that.options.axis.x.steps),
 		stepY = Math.floor(that.options.axis.y.steps);
+
+
+	var padding = that.options.padding,
+		box = that.box,
+		ox = (that.options.axis.x.fixed) ? origin.x : 0,
+		oy = (that.options.axis.y.fixed) ? origin.y : 0;
+
+	//Dimensions
+	var axis = {
+		x: {
+			x: box.x - padding,
+			y: box.y + (oy || box.y1) + padding,
+			x1: that.box.x + box.x1 + padding,
+			y1: box.y + (oy || box.y1) + padding
+		},
+
+		y: {
+			x: box.x - padding + oy,
+			y: box.y - padding,
+			x1: box.x - padding + oy,
+			y1: box.y + box.y1 + padding
+		}
+	};
 
 	// Iterate over indexes and render the features appropriately 
 	this.indexes.forEach(function(feature) {
@@ -327,10 +357,13 @@ Aristochart.prototype.render = function() {
 
 			case "axis":
 				if(defaults.axis.visible) {
-					var padding = that.options.padding,
-						box = that.box;
-					if(defaults.axis.x.visible) that.options.axis.x.render.call(that, defaults, box.x - padding, box.y + box.y1 + padding, that.box.x + box.x1 + padding, box.y + box.y1 + padding, "x");
-					if(defaults.axis.y.visible) that.options.axis.y.render.call(that, defaults, box.x - padding, box.y - padding, box.x - padding, box.y + box.y1 + padding, "y");
+					if(defaults.axis.x.visible) {
+						that.options.axis.x.render.call(that, defaults, axis.x.x, axis.x.y, axis.x.x1, axis.x.y1, "x");
+					}
+
+					if(defaults.axis.y.visible) {
+						that.options.axis.y.render.call(that, defaults, axis.y.x, axis.y.y, axis.y.x1, axis.y.y1, "y");
+					}
 				}
 			break;
 
@@ -397,16 +430,24 @@ Aristochart.prototype.render = function() {
 Aristochart.prototype.getPoints = function(callback) {
 	var lines = {},
 		Xmax = this.x.max,
+		Xmin = this.x.min,
+		Xrange = this.x.range,
 		Ymax = this.y.max,
+		Ymin = this.y.min,
+		Yrange = this.y.range,
 		bx = this.box.x,
 		by = this.box.y,
 		bx1 = this.box.x1,
-		by1 = this.box.y1; //Caching these variables in case of large datasets
+		by1 = this.box.y1, //Caching these variables in case of large datasets
+
+		Yorigin = by + ((by1/Yrange) * Ymax),
+		Xorigin = bx + ((bx1/Xrange) * Math.abs(Xmin));
 
 	//Iterate over y1, y2 etc.
 	for(var key in this.data) {
 		if(key !== "x") {
 			lines[key] = [];
+
 			var currArr = this.data[key],
 				length = currArr.length,
 				factor = 1;
@@ -419,17 +460,15 @@ Aristochart.prototype.getPoints = function(callback) {
 			var count = length/factor;
 
 			for(var i = 0; i < count; i++) {
-				var currY = currArr[i],
-
-					x = (Xmax/(count - 1)) * i,
+				var x = ((Xrange/(count - 1)) * i) + Xmin,
 					y = currArr[i],
 
 					x = this.normalize(x),
 					y = this.normalize(y),
 
 					// Calculate the raster points
-					rx = bx + (bx1*(x/Xmax));
-					ry = by + (by1 - (by1*(y/Ymax)));
+					rx = Xorigin + ((bx1/Xrange) * x),
+					ry = Yorigin - ((by1/Yrange) * y);
 
 				lines[key].push({x: x, y: y, rx: rx, ry: ry});
 
@@ -437,7 +476,14 @@ Aristochart.prototype.getPoints = function(callback) {
 			}
 		}
 	}
-	return lines;
+
+	return {
+		lines: lines,
+		origin: {
+			x: Xorigin,
+			y: Yorigin
+		}
+	}
 };
 
 /**
