@@ -36,22 +36,22 @@ var Aristochart = function(element, options, theme) {
 
 		axis: {
 			index: 1,
-			render: Aristochart.axes.line,
+			render: Aristochart.axis.line,
 
 			x: {
 				steps: 5,
-				render: Aristochart.axes.line,
+				render: Aristochart.axis.line,
 			},
 
 			y: {
 				steps: 10,
-				render: Aristochart.axes.line,
+				render: Aristochart.axis.line,
 			}
 		},
 
 		tick: {
 			index: 2,
-			render: Aristochart.ticks.line
+			render: Aristochart.tick.line
 		},
 
 		line: {
@@ -189,15 +189,15 @@ var Aristochart = function(element, options, theme) {
 	this.data = this.options.data;
 
 	// Merge the theme with the options.
-	if(this.theme) this.defaults = Aristochart.deepMerge(this.defaults, this.theme);
+	if(this.theme) this.defaults = Aristochart._deepMerge(this.defaults, this.theme);
 
 	// Merge the options with the defaults
-	for(var key in this.defaults) this.options = Aristochart.deepMerge(this.defaults, this.options);
+	for(var key in this.defaults) this.options = Aristochart._deepMerge(this.defaults, this.options);
 
 	// Merge all the styles with the default style
 	for(var style in this.options.style) 
 		for(var key in this.options.style["default"]) 
-			this.options.style[style] = Aristochart.deepMerge(this.options.style["default"], this.options.style[style]);
+			this.options.style[style] = Aristochart._deepMerge(this.options.style["default"], this.options.style[style]);
 
 	// Sort out indexes
 	this.indexes = [], that = this;
@@ -242,12 +242,13 @@ var Aristochart = function(element, options, theme) {
 
 /**
  * Deep merge two object a and b
- * 
+ *
+ * @private
  * @param  {Object} a The object to merge with
  * @param  {Object} b The recipient of the merge or the object to be merged into
  * @return {object}   The merged objects
  */
-Aristochart.deepMerge = function(defaults, options) {
+Aristochart._deepMerge = function(defaults, options) {
 	// Used "defaults" and "options" to help with the concept in my head
 	return (function recur(defaults, options) {
 		for(var key in defaults) {
@@ -475,9 +476,6 @@ Aristochart.prototype.getPoints = function(callback) {
 				var x = ((Xrange/(count - 1)) * i) + Xmin,
 					y = currArr[i],
 
-					x = this.normalize(x),
-					y = this.normalize(y),
-
 					// Calculate the raster points
 					rx = Xorigin + ((bx1/Xrange) * x),
 					ry = Yorigin - ((by1/Yrange) * y);
@@ -496,25 +494,6 @@ Aristochart.prototype.getPoints = function(callback) {
 			y: Yorigin
 		}
 	}
-};
-
-/**
- * Simple proxy for Aristochart.getPoints
- * @param  {Function} callback See getPoints
- * @return {null}            
- */
-Aristochart.prototype.iterateOverPoints = function(callback) {
-	this.getPoints(callback);
-};
-
-/**
- * Normalize the points on an axis
- * @param  {int} val The input value to be normalized 
- * @param  {"y"|"x"} val The axis to normalize against
- * @return {int}     Normalized value
- */
-Aristochart.prototype.normalize = function(val, axis) {
-	return val;
 };
 
 /**
@@ -579,7 +558,7 @@ Aristochart.line = {
 	}
 };
 
-Aristochart.ticks = {
+Aristochart.tick = {
 	line: function(style, x, y, type, i) {
 		this.ctx.save();
 		this.ctx.strokeStyle = style.tick.stroke;
@@ -617,7 +596,7 @@ Aristochart.ticks = {
 	}
 };
 
-Aristochart.axes = {
+Aristochart.axis = {
 	line: function(style, x, y, x1, y1, type) {
 		this.ctx.save();
 		this.ctx.strokeStyle = style.axis.stroke;

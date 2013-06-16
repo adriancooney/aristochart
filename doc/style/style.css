@@ -290,6 +290,24 @@ footer p a {
 .documentation .changelog ul li {
   margin: 12px;
 }
+.documentation h3 {
+  font-family: monospace;
+  font-style: normal;
+  font-size: 18px;
+  border-bottom: none;
+  border-left: 4px solid #19788b;
+  margin-top: 18px;
+  margin-bottom: 16px;
+  color: #219eb6;
+}
+.documentation h3 em {
+  font-style: italic;
+  color: #44757e;
+}
+.documentation h3 span {
+  color: green;
+  font-style: italic;
+}
 .home .flap-active {
   -webkit-transform: translate(0, 0);
 }

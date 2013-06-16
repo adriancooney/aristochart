@@ -19,18 +19,16 @@
 	<div class="content documentation">
 		<div class="wrapper">
 			<div class="column thin links" id="sidebar">
-				<div><span><a href="#general">General</a></span></div>
-				<div><span><a href="#theming">Themeing</a></span></div>
-				<div><span><a href="#data">Data</a></span></div>
-				<div><span><a href="#api">API</a></span>
-					<div><span><a href="#api.constructor">Aristochart</a></span></div>
-				</div>
-				<div><span><a href="#changelog">Changelog</a></span></div>
+				<div><span>General</span></div>
+				<div><span>Theming</span></div>
+				<div><span>Data</span></div>
+				<div><span>API</span></div>
+				<div><span>Changelog</span></div>
 			</div><div class="column wide">
 				<h2>General</h2>
 				<p>Aristochart works by rendering graph data onto the <span class="tag">canvas</span> element. Canvas is fast and requires very little resources to render. This brings up the question of browser compatibility. Currently <a href="http://caniuse.com/canvas">all major browsers support the canvas element</a> but IE 6, 7 and 8 are left out in the cold. There are no plans to support these browsers in the near future.</p>
 
-				<h2>Themeing</h2>
+				<h2>Theming</h2>
 				<p>Aristochart itself is more of a data manager, it's the theme that takes control of rendering the data on screen. Aristochart comes with a default set of render functions, each of which can be overridden by a theme. Below is a list of features that can be implemented by the theme and the data that is sent to each feature's render function.</p>
 				<table>
 					<tr>
@@ -52,6 +50,25 @@
 						<td><p>style <em>Style object</em>, points <em>An array of Points <code>{rx, ry, x, y}</code></em></p></td>
 					</tr>
 				</table>
+				<h2>API</h2>
+				<p>Aristochart aims for simplicity so it's API follows that philosophy. Usually, the <code>Aristochart</code> constructor will satisfy most your needs but below is all the exposed functions you can hook your application into to work <em>even</em> better with Aristochart.</p>
+
+				<h3><em>class</em> Aristochart( <span><em>?element</em>, <em>options</em>, <em>?theme</em></span> )</h3>
+				<h3><em>&lt;instance&gt;</em>.render( )</h3> 
+				<p>Renders the chart onto the supplied or generated canvas.</p>
+				<h3><em>&lt;instance&gt;</em>.getPoints( ) <span>{ origin, points }</span></h3> 
+				<h3><em>&lt;instance&gt;</em>.refreshBounds( )</h3>
+				<p>Refreshs the <code>y.min</code>, <code>y.max</code>, <code>x.min</code>, <code>x.max</code> variables. These represent the upper and lower bounds of the supplied data which is used in calculating the labels and spacing on the chart. <code>&lt;instance>.refreshBounds()</code> is called in <code>&lt;instance>.render()</code>.</p>
+				<h3><em>&lt;instance&gt;</em>.toImage( ) <span>Image</span></h3>
+				<p>Base64 encodes the canvas element and returns a printable <code>Image</code> element.</p>
+				<h3><em>Aristochart</em>.themes</h3>
+				<h3><em>Aristochart</em>.point</h3>
+				<h3><em>Aristochart</em>.line</h3>
+				<h3><em>Aristochart</em>.tick</h3>
+				<h3><em>Aristochart</em>.axis</h3>
+				<h3><em>Aristochart</em>.label</h3>
+				<h3><em>Aristochart</em>.title</h3>
+
 				<h2>Roadmap</h2>
 				<ul>
 					<li>Expand to pie charts, histograms etc.</li>
@@ -83,6 +100,29 @@
 	window.addEventListener("scroll", function() {
 		var scroll = document.body.scrollTop < 0 ? 0 : document.body.scrollTop;
 		sidebar.style.marginTop = (scroll > 72 ? -60 : -(scroll) + 14) + "px";	
-	})
+	});
+
+	var namespace = "doc.";
+
+	// Convert the sidebars to links
+	(function toLinks(divs) {
+		Array.prototype.forEach.call(divs, function(div) {
+			var span = div.getElementsByTagName("span")[0],
+				recur = div.getElementsByTagName("div");
+
+			var a = document.createElement("a");
+			a.href = "#" + namespace + span.innerText.toLowerCase();
+			a.innerText = span.innerText;
+			span.innerHTML = "";
+			span.appendChild(a);
+
+			if(recur) toLinks(recur);
+		})
+	})(document.getElementById("sidebar").children);
+
+	//Add the id's to the headers
+	Array.prototype.forEach.call(document.querySelectorAll("h1, h2, h3"), function(h) {
+		if(!h.id) h.id = namespace + h.innerText.toLowerCase();
+	});
 </script>
 </html>
