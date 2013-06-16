@@ -230,6 +230,19 @@ footer p a {
 .documentation .wide {
   margin-left: 288px;
 }
+.documentation .changelog p {
+  font-weight: bold;
+}
+.documentation .changelog p .version,
+.documentation .changelog p a {
+  font-weight: normal;
+}
+.documentation .changelog ul {
+  margin: 8px 18px;
+}
+.documentation .changelog ul li {
+  margin: 12px;
+}
 .home .flap-active {
   -webkit-transform: translate(0, 0);
 }
