@@ -32,7 +32,7 @@
 		<div class="wrapper">
 			<p class="back"><a href="../index.html">&larr; Back to examples</a></p>
 			<h2>Description</h2>
-			<p id="description">Demonstrates the usage of <code>&lt;instance>.toImage()</code>.</p>
+			<p id="description">Demonstrates the usage of <code>&lt;instance>.toImage()</code>. The image size is dependant on the <code>window.devicePixelRatio</code> or the resolution of your screen. It's best to set a width and height.</p>
 			<h2>Code</h2>
 			<pre id="input-code"></pre>
 			<h2>Output</h2>
@@ -51,15 +51,17 @@
 // Add your example
 var holder = document.getElementById("holder");
 
-var graph = new Aristochart(holder, {
+var graph = new Aristochart({
 	data: {
 		x: 10,
 		y: [0, 1, 2, 3, 4, 5, 6, 6, 5, 4, 3, 3, 4, 5, 6, 7, 8, 9, 10],
 		y1: [10, 9, 8, 7, 7, 6, 2, 1, 1, 1],
 		y2: [4, 4, 4, 3, 3, 2, 2, 1, 0, 0, 0, 0]
-	},
-
-	render: false
+	}
 });
+
+var img = graph.toImage();
+
+holder.appendChild(img);
 </script>
 </html>

@@ -6,29 +6,36 @@
 
 //Given as an example. This is already included in Aristochart.js
 Aristochart.themes.default = {
+	width: 640,
+	height: 400,
 	margin: 70,
-	padding: 20,	
+	padding: 20,
+	render: true, //Automatically render
 
 	fill: {
 		index: 0,
-		render: Aristochart.line.fill
+		render: Aristochart.line.fill,
+		fillToBaseLine: true,
 	},
 
 	axis: {
 		index: 1,
-		render: Aristochart.axes.line,
+		render: Aristochart.axis.line,
+
 		x: {
-			steps: 5
+			steps: 5,
+			render: Aristochart.axis.line,
 		},
 
 		y: {
-			steps: 10
+			steps: 10,
+			render: Aristochart.axis.line,
 		}
 	},
 
 	tick: {
 		index: 2,
-		render: Aristochart.ticks.line
+		render: Aristochart.tick.line
 	},
 
 	line: {
@@ -60,24 +67,6 @@ Aristochart.themes.default = {
 	},
 
 	style: {
-		y: {
-			line: {
-				stroke: "#298281"
-			}
-		},
-
-		y1: {
-			line: {
-				stroke: "#49bfbf"
-			}
-		},
-
-		y2: {
-			line: {
-				stroke: "#49bfd4"
-			}
-		},
-
 		default: {
 			point: {
 				stroke: "#000",
@@ -88,14 +77,26 @@ Aristochart.themes.default = {
 			},
 
 			line: {
-				stroke: "#f00",
+				stroke: "#298281",
 				width: 3,
-				fill: "rgba(150, 215, 226, 0.4)"
+				fill: "rgba(150, 215, 226, 0.4)",
+				visible: true
 			},
 
 			axis: {
 				stroke: "#ddd",
-				width: 3
+				width: 3,
+				visible: true,
+
+				x: {
+					visible: true,
+					fixed: true
+				},
+
+				y: {
+					visible: true,
+					fixed: true
+				}
 			},
 
 			tick: {
@@ -103,7 +104,16 @@ Aristochart.themes.default = {
 				stroke: "#ddd",
 				width: 2,
 				minor: 10,
-				major: 15
+				major: 15,
+				visible: true,
+
+				x: {
+					fixed: true
+				},
+
+				y: {
+					fixed: true	
+				}
 			},
 
 			label: {
@@ -115,7 +125,9 @@ Aristochart.themes.default = {
 					align: "center",
 					baseline: "bottom",
 					offsetY: 8,
-					offsetX: 3
+					offsetX: 3,
+					visible: true,
+					fixed: true
 				},
 
 				y: {
@@ -126,7 +138,9 @@ Aristochart.themes.default = {
 					align: "center",
 					baseline: "bottom",
 					offsetY: 8,
-					offsetX: 8
+					offsetX: 8,
+					visible: true,
+					fixed: true
 				}
 			},
 
@@ -135,15 +149,18 @@ Aristochart.themes.default = {
 				font: "georgia",
 				fontSize: "16",
 				fontStyle: "italic",
+				visible: true,
 
 				x: {
 					offsetX: 0,
-					offsetY: 120
+					offsetY: 120,
+					visible: true
 				},
 
 				y: {
 					offsetX: -135,
-					offsetY: 10
+					offsetY: 10,
+					visible: true
 				}
 			}
 		}

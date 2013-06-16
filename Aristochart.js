@@ -390,8 +390,8 @@ Aristochart.line = {
 		});
 
 		//Find bounding box
-		this.ctx.lineTo(points[points.length - 1].rx, this.box.y + this.box.y1 + ((this.options.fill.fillToBaseLine) ? this.options.padding : 0));
-		this.ctx.lineTo(points[0].rx, this.box.y + this.box.y1 + ((this.options.fill.fillToBaseLine) ? this.options.padding : 0));
+		this.ctx.lineTo(points[points.length - 1].rx, this.box.y + this.box.y1 + ((style.line.fillToBaseLine) ? this.options.padding : 0));
+		this.ctx.lineTo(points[0].rx, this.box.y + this.box.y1 + ((style.line.fillToBaseLine) ? this.options.padding : 0));
 		this.ctx.closePath();
 		this.ctx.fill();
 		this.ctx.restore();
@@ -507,8 +507,7 @@ Aristochart.themes.default = {
 
 	fill: {
 		index: 0,
-		render: Aristochart.line.fill,
-		fillToBaseLine: true,
+		render: Aristochart.line.fill
 	},
 
 	axis: {
@@ -573,6 +572,7 @@ Aristochart.themes.default = {
 				stroke: "#298281",
 				width: 3,
 				fill: "rgba(150, 215, 226, 0.4)",
+				fillToBaseLine: true,
 				visible: true
 			},
 

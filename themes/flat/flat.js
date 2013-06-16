@@ -9,39 +9,7 @@ Aristochart.themes.flat = {
 	padding: 20,	
 
 	fill: {
-		index: 0,
-		render: Aristochart.line.fill,
 		fillToBaseLine: false
-	},
-
-	axis: {
-		index: 1,
-		render: Aristochart.axes.line,
-	},
-
-	tick: {
-		index: 2,
-		render: Aristochart.ticks.line
-	},
-
-	line: {
-		index: 3,
-		render: Aristochart.line.line
-	},
-
-	point: {
-		index: 4,
-		render: Aristochart.point.circle
-	},
-
-	label: {
-		index: 5,
-		render: Aristochart.label.text,
-	},
-
-	title: {
-		index: 6,
-		render: Aristochart.title.text
 	},
 
 	style: {
@@ -74,7 +42,8 @@ Aristochart.themes.flat = {
 			line: {
 				stroke: "#000",
 				width: 2,
-				visible: false
+				visible: false,
+				fillToBaseLine: false
 			},
 
 			axis: {
