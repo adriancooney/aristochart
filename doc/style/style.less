@@ -79,6 +79,57 @@ code {
 	margin: 0;
 }
 
+pre {
+	.number {
+		color: #000;
+	}
+
+	.operator {
+		color: #5794cd;
+	}
+
+	.keyword.js {
+		color: #9971ca;
+	}
+
+	.keyword.element {
+		color: darken(@blue, 10%);
+	}
+
+	.keyword.bool {
+		color: #cd41da;
+	}
+
+	.keyword.type {
+		color: #647589;
+	}
+
+	.reserved {
+		color: #444;
+	}
+
+	.quote {
+		color: #d86862;
+	}
+
+	.preprocessor {
+		color: #c49f20;
+	}
+
+	.tab {
+		color: rgba(0,0,0,0.1);
+		text-shadow: none;
+	}
+
+	.comment {
+		color: green;
+
+		* {
+			color: green !important;
+		}
+	}
+}
+
 p {
 	line-height: 150%;
 

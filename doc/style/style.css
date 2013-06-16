@@ -58,6 +58,43 @@ code {
   padding: 2px 4px;
   margin: 0;
 }
+pre .number {
+  color: #000;
+}
+pre .operator {
+  color: #5794cd;
+}
+pre .keyword.js {
+  color: #9971ca;
+}
+pre .keyword.element {
+  color: #219eb6;
+}
+pre .keyword.bool {
+  color: #cd41da;
+}
+pre .keyword.type {
+  color: #647589;
+}
+pre .reserved {
+  color: #444;
+}
+pre .quote {
+  color: #d86862;
+}
+pre .preprocessor {
+  color: #c49f20;
+}
+pre .tab {
+  color: rgba(0, 0, 0, 0.1);
+  text-shadow: none;
+}
+pre .comment {
+  color: green;
+}
+pre .comment * {
+  color: green !important;
+}
 p {
   line-height: 150%;
 }
