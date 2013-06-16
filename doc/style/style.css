@@ -30,9 +30,15 @@ h3 {
   border-bottom: 1px solid #ccc;
   margin-bottom: 6px;
 }
+a {
+  color: #19788b;
+}
 .column {
   display: inline-block;
   vertical-align: top;
+}
+.column.half {
+  width: 50%;
 }
 .column.wide {
   width: 70%;
@@ -40,8 +46,11 @@ h3 {
 .column.thin {
   width: 30%;
 }
-.column.half {
-  width: 50%;
+.column.wider {
+  width: 80%;
+}
+.column.thinner {
+  width: 20%;
 }
 code,
 pre {
@@ -98,9 +107,6 @@ pre .comment * {
 p {
   line-height: 150%;
 }
-p a {
-  color: #19788b;
-}
 p .tag {
   color: #fc356c;
   font-family: monospace;
@@ -115,7 +121,7 @@ p .tag:after {
 p .version {
   font-family: monospace;
   font-size: 120%;
-  color: #ff942d;
+  color: #fc356c;
 }
 ul li {
   list-style-type: disc;
@@ -274,8 +280,8 @@ footer p a {
   font-size: 18px;
   margin-right: 18px;
 }
-.documentation .wide {
-  margin-left: 288px;
+.documentation .wider {
+  margin-left: 192px;
 }
 .documentation .changelog p {
   font-weight: bold;
@@ -284,10 +290,23 @@ footer p a {
 .documentation .changelog p a {
   font-weight: normal;
 }
-.documentation .changelog ul {
+.documentation ol {
+  margin: 0 18px 12px;
+}
+.documentation ol li {
+  margin: 4px 0;
+}
+.documentation ol li em {
+  font-family: monospace;
+  font-size: 115%;
+}
+.documentation ol li strong {
+  color: #ccc;
+}
+.documentation ul {
   margin: 8px 18px;
 }
-.documentation .changelog ul li {
+.documentation ul li {
   margin: 12px;
 }
 .documentation h3 {
@@ -297,7 +316,7 @@ footer p a {
   border-bottom: none;
   border-left: 4px solid #19788b;
   margin-top: 30px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   color: #219eb6;
 }
 .documentation h3 em {

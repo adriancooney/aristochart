@@ -18,13 +18,15 @@
 	</header>
 	<div class="content documentation">
 		<div class="wrapper">
-			<div class="column thin links" id="sidebar">
+			<div class="column thinner links" id="sidebar">
 				<div><span>General</span></div>
 				<div><span>Theming</span></div>
 				<div><span>Data</span></div>
+				<div><span>Options</span></div>
 				<div><span>API</span></div>
+				<div><span>Roadmap</span></div>
 				<div><span>Changelog</span></div>
-			</div><div class="column wide">
+			</div><div class="column wider">
 				<h2>General</h2>
 				<p>Aristochart works by rendering graph data onto the <span class="tag">canvas</span> element. Canvas is fast and requires very little resources to render. This brings up the question of browser compatibility. Currently <a href="http://caniuse.com/canvas">all major browsers support the canvas element</a> but IE 6, 7 and 8 are left out in the cold. There are no plans to support these browsers in the near future.</p>
 
@@ -50,28 +52,39 @@
 						<td><p>style <em>Style object</em>, points <em>An array of Points <code>{rx, ry, x, y}</code></em></p></td>
 					</tr>
 				</table>
+
+				<h2>Options</h2>
+				<p>Aristochart has a vast amount of options, each of which can be overridden by a theme and then the user.</p>
+
 				<h2>API</h2>
 				<p>Aristochart aims for simplicity so it's API follows that philosophy. Usually, the <code>Aristochart</code> constructor will satisfy most your needs but below is all the exposed functions you can hook your application into to work <em>even</em> better with Aristochart.</p>
 
 				<h3><em>class</em> Aristochart( <span><em>?element</em>, <em>options</em>, <em>?theme</em></span> )</h3>
+				<ol>
+					<li><em>element</em> The canvas element or element to place canvas into. <strong>(optional)</strong></li>
+					<li><em>options</em> Aristochart's options object. See <a href="#doc.options">Options</a>.</li>
+					<li><em>theme</em> A theme object. See <a href="../themes/index.html">Themes.</a> <strong>(optional)<strong></li>
+				</ol>
+				<p>This is Aristochart's constructor. If you pass a <span class="tag">canvas</span>, Aristochart will render onto this. If you pass a wrapper, Aristochart will generate the <span class="tag">canvas</span> and append it into the wrapper. If no elements are passed, Aristochart will generate a <span class="tag">canvas</span> and will make it accessible via <code>&lt;instance>.canvas</code> for your own placement at a later time.</p>
+				<p>The <code>options</code> object is where Aristochart takes all it's settings from. There is only one property required in the options object and that's the <code>data</code> property. See <a href="#doc.data">Data</a> for more information. Once passed, the object runs through a number of merges. First of all, the options object is merged with the theme passed if any, writing any settings not set by the user. Next, it's merged with the defaults and overwrites any settings not set by the user or theme. This is done to ensure the objects continuity throughout Aristochart. These merges are completed within the constructor during initilization. To edit any options after initilizing Aristochart, you can access the options object at <code>&lt;instance>.options</code> and edit at will but changes will not appear till <code>&lt;instance>.render</code> is called.</p>
 				<h3><em>&lt;instance&gt;</em>.render( )</h3> 
 				<p>Renders the chart onto the supplied or generated <span class="tag">canvas</span>.</p>
-				<h3><em>&lt;instance&gt;</em>.getPoints( ) <span>{ origin, points }</span></h3> 
+				<h3><em>&lt;instance&gt;</em>.getPoints( ) <span>{ origin, points }</span></h3>
+				<p>This method returns an object with the graph's raster <code>origin</code> coordinates and each separate line's points. For example, if multiple y lines are passed in the data, <code>getPoints</code> would c
 				<h3><em>&lt;instance&gt;</em>.refreshBounds( )</h3>
 				<p>Refreshs the <code>y.min</code>, <code>y.max</code>, <code>x.min</code>, <code>x.max</code> variables. These represent the upper and lower bounds of the supplied data which is used in calculating the labels and spacing on the chart. <code>&lt;instance>.refreshBounds()</code> is called in <code>&lt;instance>.render()</code>.</p>
 				<h3><em>&lt;instance&gt;</em>.toImage( ) <span>Image</span></h3>
 				<p>Base64 encodes the canvas element and returns a printable <code>Image</code> element.</p>
 				<h3><em>Aristochart</em>.themes</h3>
-				<h3><em>Aristochart</em>.point</h3>
-				<h3><em>Aristochart</em>.line</h3>
-				<h3><em>Aristochart</em>.tick</h3>
-				<h3><em>Aristochart</em>.axis</h3>
-				<h3><em>Aristochart</em>.label</h3>
-				<h3><em>Aristochart</em>.title</h3>
+				<p>The variable where theme's are stored. Aristochart's default theme is store in <code>Aristochart.themes.default</code>.</p>
+				<h3><em>Aristochart</em>.point|line|tick|axis|label|title</h3>
+				<p>These variables are where Aristochart's feature's render functions are stored. These stores hold the functions that render specific items onto the canvas. <code>Aristochart.point.circle</code> for example renders the graph points you see in the default theme. See <a href="#doc.theming">Theming</a> for information on parameters passed to these functions and how to implement your own functions.</p>
 
 				<h2>Roadmap</h2>
 				<ul>
 					<li>Expand to pie charts, histograms etc.</li>
+					<li>Animation</li>
+					<li>Input functions as data.</li>
 				</ul>
 
 				<h2>Changelog</h2>
@@ -81,6 +94,7 @@
 					<ul>
 						<li>Data is handled better on negative axes.</li>
 						<li>Fluid axes.</li>
+						<li>3 themes added: Orange, dot, flat.</li>
 					</ul>
 					<p>Initial Release: <span class="version">v0.1</span> <a href="https://github.com/dunxrion/aristochart/archive/v0.1.zip">(download)</a></p>
 				</div>
