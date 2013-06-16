@@ -8,9 +8,21 @@
 </body>
 <script type="text/javascript">
 	var bigdata = [25];
-	for(var i = 1; i < 100000; i++) bigdata.push(bigdata[i - 1] + (Math.random() * ((Math.random() > 0.5) ? -1 : 1)));
+	for(var i = 1; i < 100000; i++) {
+		var val = bigdata[i - 1] + (Math.random() * ((Math.random() > 0.5) ? -1 : 1));
+		val = (val > 50) ? 50 : val;
+		val = (val < 0) ? 0 : val;
+		bigdata.push(val);
+	}
 
 	window.graph = new Aristochart(document.body, {
+		axis: {
+			y: {
+				min: 0,
+				max: 50
+			}
+		},
+
 		style: {
 			default: {
 				point: {

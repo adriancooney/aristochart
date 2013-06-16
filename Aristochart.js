@@ -41,13 +41,11 @@ var Aristochart = function(element, options, theme) {
 			x: {
 				steps: 5,
 				render: Aristochart.axes.line,
-				fixed: false,
 			},
 
 			y: {
 				steps: 10,
 				render: Aristochart.axes.line,
-				fixed: false
 			}
 		},
 
@@ -107,11 +105,13 @@ var Aristochart = function(element, options, theme) {
 					visible: true,
 
 					x: {
-						visible: true
+						visible: true,
+						fixed: true
 					},
 
 					y: {
-						visible: true
+						visible: true,
+						fixed: true
 					}
 				},
 
@@ -121,7 +121,15 @@ var Aristochart = function(element, options, theme) {
 					width: 2,
 					minor: 10,
 					major: 15,
-					visible: true
+					visible: true,
+
+					x: {
+						fixed: true
+					},
+
+					y: {
+						fixed: true	
+					}
 				},
 
 				label: {
@@ -134,7 +142,8 @@ var Aristochart = function(element, options, theme) {
 						baseline: "bottom",
 						offsetY: 8,
 						offsetX: 3,
-						visible: true
+						visible: true,
+						fixed: true
 					},
 
 					y: {
@@ -146,7 +155,8 @@ var Aristochart = function(element, options, theme) {
 						baseline: "bottom",
 						offsetY: 8,
 						offsetX: 8,
-						visible: true
+						visible: true,
+						fixed: true
 					}
 				},
 
@@ -324,22 +334,24 @@ Aristochart.prototype.render = function() {
 
 	var padding = that.options.padding,
 		box = that.box,
-		ox = (that.options.axis.x.fixed) ? origin.x : 0,
-		oy = (that.options.axis.y.fixed) ? origin.y : 0;
+		ox = origin.x,
+		oy = origin.y;
+
+	console.log("Origin x, y: ", ox, oy);
 
 	//Dimensions
 	var axis = {
 		x: {
 			x: box.x - padding,
-			y: box.y + (oy || box.y1) + padding,
+			y: (box.y + box.y1 + padding),
 			x1: that.box.x + box.x1 + padding,
-			y1: box.y + (oy || box.y1) + padding
+			y1: (box.y + box.y1+ padding)
 		},
 
 		y: {
-			x: box.x - padding + oy,
+			x: (box.x - padding),
 			y: box.y - padding,
-			x1: box.x - padding + oy,
+			x1: (box.x - padding),
 			y1: box.y + box.y1 + padding
 		}
 	};
@@ -351,18 +363,18 @@ Aristochart.prototype.render = function() {
 				for(var line in lines)
 					if((that.options.style[line] || defaults).point.visible)
 						lines[line].forEach(function(obj) {
-							that.options.point.render.call(that, that.options.style[line] || that.options.style.default, obj.rx, obj.ry, obj.x, obj.y, obj.graph);
+							that.options.point.render.call(that, that.options.style[line] || defaults, obj.rx, obj.ry, obj.x, obj.y, obj.graph);
 						});
 			break;
 
 			case "axis":
 				if(defaults.axis.visible) {
 					if(defaults.axis.x.visible) {
-						that.options.axis.x.render.call(that, defaults, axis.x.x, axis.x.y, axis.x.x1, axis.x.y1, "x");
+						that.options.axis.x.render.call(that, defaults, axis.x.x, (defaults.axis.y.fixed) ? axis.x.y : oy, axis.x.x1, (defaults.axis.y.fixed) ? axis.x.y1 : oy, "x");
 					}
 
 					if(defaults.axis.y.visible) {
-						that.options.axis.y.render.call(that, defaults, axis.y.x, axis.y.y, axis.y.x1, axis.y.y1, "y");
+						that.options.axis.y.render.call(that, defaults, (defaults.axis.x.fixed) ? axis.y.x : ox, axis.y.y, (defaults.axis.x.fixed) ? axis.y.x1 : ox, axis.y.y1, "y");
 					}
 				}
 			break;
@@ -379,8 +391,8 @@ Aristochart.prototype.render = function() {
 					var disX = that.box.x1/(stepX),
 						disY = that.box.y1/(stepY);
 
-					for(var i = 0; i < (stepX + 1); i++) that.options.tick.render.call(that, defaults, that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
-					for(var i = 0; i < (stepY + 1); i++) that.options.tick.render.call(that, defaults, that.box.x - that.options.padding, that.box.y + (disY * i), "y", i);
+					for(var i = 0; i < (stepX + 1); i++) that.options.tick.render.call(that, defaults, that.box.x  + (disX * i), (defaults.tick.x.fixed) ? axis.x.y1 : oy, "x", i);
+					for(var i = 0; i < (stepY + 1); i++) that.options.tick.render.call(that, defaults, (defaults.tick.y.fixed) ? axis.y.x1 : ox, that.box.y + (disY * i), "y", i);
 				}
 			break;
 
@@ -390,13 +402,13 @@ Aristochart.prototype.render = function() {
 
 					if(defaults.label.x.visible)
 						for(var i = 0; i < (stepX + 1); i++) 
-							that.options.label.render.call(that, defaults, that.x.min + (((that.x.max - that.x.min)/stepX) * i), that.box.x  + (disX * i), that.box.y + that.box.y1 + that.options.padding, "x", i);
+							that.options.label.render.call(that, defaults, that.x.min + (((that.x.max - that.x.min)/stepX) * i), that.box.x  + (disX * i),  (defaults.label.x.fixed) ? axis.x.y1 : oy, "x", i);
 						
 					if(defaults.label.y.visible)
 						for(var i = 0; i < (stepY + 1); i++) {
 							var pos = stepY - i,
 								label = that.y.min + ((that.y.max - that.y.min)/stepY) * pos; // Label sorting algorithm
-							that.options.label.render.call(that, defaults, label, that.box.x - that.options.padding, that.box.y + (disY * i), "y", i);
+							that.options.label.render.call(that, defaults, label, (defaults.label.y.fixed) ? axis.y.x1 : ox, that.box.y + (disY * i), "y", i);
 						}
 
 			break;
