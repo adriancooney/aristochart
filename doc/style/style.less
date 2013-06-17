@@ -124,10 +124,6 @@ pre {
 		color: #d86862;
 	}
 
-	.preprocessor {
-		color: #c49f20;
-	}
-
 	.tab {
 		color: rgba(0,0,0,0.1);
 		text-shadow: none;
@@ -429,6 +425,46 @@ footer {
 		}
 	}
 
+	#options-view {
+		background: #f4f4f4;
+		border-radius: 0;
+		border: none;
+		margin: 18px 0;
+		font-size: 16px;
+		line-height: 110%;
+
+		.quote {
+			color: @red;
+
+			* {
+				color: inherit !important;
+			}
+		}
+
+		.prop {
+			color: darken(@blue, 20%);
+		}
+
+		.keyword {
+			color: purple;
+		}
+
+		.comment {
+			color: green;
+			font-weight: bold;
+			cursor: pointer;
+			font-size: 96%;
+			opacity: 0.5;
+		}
+
+		.comment:hover {
+			opacity: 1;
+		}
+
+		.number {
+			color: #000;
+		}
+	}
 }
 
 .home {

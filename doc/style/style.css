@@ -91,9 +91,6 @@ pre .reserved {
 pre .quote {
   color: #d86862;
 }
-pre .preprocessor {
-  color: #c49f20;
-}
 pre .tab {
   color: rgba(0, 0, 0, 0.1);
   text-shadow: none;
@@ -326,6 +323,39 @@ footer p a {
 .documentation h3 span {
   color: green;
   font-style: italic;
+}
+.documentation #options-view {
+  background: #f4f4f4;
+  border-radius: 0;
+  border: none;
+  margin: 18px 0;
+  font-size: 16px;
+  line-height: 110%;
+}
+.documentation #options-view .quote {
+  color: #fc356c;
+}
+.documentation #options-view .quote * {
+  color: inherit !important;
+}
+.documentation #options-view .prop {
+  color: #19788b;
+}
+.documentation #options-view .keyword {
+  color: purple;
+}
+.documentation #options-view .comment {
+  color: green;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 96%;
+  opacity: 0.5;
+}
+.documentation #options-view .comment:hover {
+  opacity: 1;
+}
+.documentation #options-view .number {
+  color: #000;
 }
 .home .flap-active {
   -webkit-transform: translate(0, 0);

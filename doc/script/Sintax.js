@@ -14,7 +14,7 @@ var Sintax = {
 	syntaxHighlight: function(text) {
 		var rules = {
 			//Quotes
-			"(@?(?:\"|')[^\"']*(?:\"|'))": "<span class=\"quote\">$1</span>",
+			"((?:\"|')[^\"']*(?:\"|'))": "<span class=\"quote\">$1</span>",
 
 			//Match numbers
 			"\\b([0-9]+)\\b": "<span class=\"number\">$1</span>",
@@ -51,9 +51,6 @@ var Sintax = {
 		//And now comments, line by line
 		text = text.replace(new RegExp("(\\/\\/.*)", "g"), "<span class=\"comment\">$1</span>");
 		text = text.replace(new RegExp("(/\\*[^(?:\\*/)]*\\*/)", "g"), "<span class=\"comment\">$1</span>");
-
-		//Imports/preprocessor
-		text = text.replace(new RegExp("(#.*)", "g"), "<span class=\"preprocessor\">$1</span>");
 
 		//Finally, replace tabs
 		text = text.replace(new RegExp("\\t", "g"), "<span class=\"tab\">&#8213;&#8213; </span>");
