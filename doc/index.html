@@ -23,6 +23,7 @@
 				<div><span>Theming</span></div>
 				<div><span>Data</span></div>
 				<div><span>Options</span></div>
+				<div><span>Dimensions</span></div>
 				<div><span>API</span></div>
 				<div><span>Roadmap</span></div>
 				<div><span>Changelog</span></div>
@@ -53,8 +54,173 @@
 					</tr>
 				</table>
 
+				<h2>Data</h2>
+
 				<h2>Options</h2>
-				<p>Aristochart has a vast amount of options, each of which can be overridden by a theme and then the user.</p>
+				<p>Aristochart has a vast amount of options, each of which can be overridden by a theme and then the user. Below is a the default options, each of which can be overridden.</p>
+				<pre id="options-view">
+{
+	width: 640, //Width in pixels
+	height: 400, //Height in pixels
+	margin: 70, //Margin between the axis and border. See dimensions.
+	padding: 20, //Padding between the axis and data. See dimensions.
+	render: true, //Toggle Aristochart automatically calling .render
+
+	fill: { //The fill feature. The fill under the graph.
+		index: 0, //The features index. Each feature has its own.
+		render: Aristochart.line.fill, //The line fills render function
+		fillToBaseLine: true, //Toggle filling to the baseline.
+	},
+
+	axis: {
+		index: 1,
+		render: Aristochart.axis.line,
+
+		x: {
+			steps: 5,
+			render: Aristochart.axis.line,
+		},
+
+		y: {
+			steps: 10,
+			render: Aristochart.axis.line,
+		}
+	},
+
+	tick: {
+		index: 2,
+		render: Aristochart.tick.line
+	},
+
+	line: {
+		index: 3,
+		render: Aristochart.line.line
+	},
+
+	point: {
+		index: 4,
+		render: Aristochart.point.circle
+	},
+
+	label: {
+		index: 5,
+		render: Aristochart.label.text,
+		x: {
+			step: 1
+		},
+		y: {
+			step: 1
+		}
+	},
+
+	title: {
+		index: 6,
+		render: Aristochart.title.text,
+		x: "x",
+		y: "y"
+	},
+
+	style: {
+		default: {
+			point: {
+				stroke: "#000",
+				fill: "#fff",
+				radius: 4,
+				width: 3,
+				visible: true
+			},
+
+			line: {
+				stroke: "#298281",
+				width: 3,
+				fill: "rgba(150, 215, 226, 0.4)",
+				visible: true
+			},
+
+			axis: {
+				stroke: "#ddd",
+				width: 3,
+				visible: true,
+
+				x: {
+					visible: true,
+					fixed: true
+				},
+
+				y: {
+					visible: true,
+					fixed: true
+				}
+			},
+
+			tick: {
+				align: "middle", //"outside", "inside",
+				stroke: "#ddd",
+				width: 2,
+				minor: 10,
+				major: 15,
+				visible: true,
+
+				x: {
+					fixed: true
+				},
+
+				y: {
+					fixed: true	
+				}
+			},
+
+			label: {
+				x: {
+					font: "Helvetica",
+					fontSize: 14,
+					fontStyle: "normal",
+					color: "#000",
+					align: "center",
+					baseline: "bottom",
+					offsetY: 8,
+					offsetX: 3,
+					visible: true,
+					fixed: true
+				},
+
+				y: {
+					font: "Helvetica",
+					fontSize: 10,
+					fontStyle: "normal",
+					color: "#000",
+					align: "center",
+					baseline: "bottom",
+					offsetY: 8,
+					offsetX: 8,
+					visible: true,
+					fixed: true
+				}
+			},
+
+			title: {
+				color: "#777",
+				font: "georgia",
+				fontSize: "16",
+				fontStyle: "italic",
+				visible: true,
+
+				x: {
+					offsetX: 0,
+					offsetY: 120,
+					visible: true
+				},
+
+				y: {
+					offsetX: -135,
+					offsetY: 10,
+					visible: true
+				}
+			}
+		}
+	}
+};
+				</pre>
 
 				<h2>API</h2>
 				<p>Aristochart aims for simplicity so it's API follows that philosophy. Usually, the <code>Aristochart</code> constructor will satisfy most your needs but below is all the exposed functions you can hook your application into to work <em>even</em> better with Aristochart.</p>
@@ -66,7 +232,7 @@
 					<li><em>theme</em> A theme object. See <a href="../themes/index.html">Themes.</a> <strong>(optional)<strong></li>
 				</ol>
 				<p>This is Aristochart's constructor. If you pass a <span class="tag">canvas</span>, Aristochart will render onto this. If you pass a wrapper, Aristochart will generate the <span class="tag">canvas</span> and append it into the wrapper. If no elements are passed, Aristochart will generate a <span class="tag">canvas</span> and will make it accessible via <code>&lt;instance>.canvas</code> for your own placement at a later time.</p>
-				<p>The <code>options</code> object is where Aristochart takes all it's settings from. There is only one property required in the options object and that's the <code>data</code> property. See <a href="#doc.data">Data</a> for more information. Once passed, the object runs through a number of merges. First of all, the options object is merged with the theme passed if any, writing any settings not set by the user. Next, it's merged with the defaults and overwrites any settings not set by the user or theme. This is done to ensure the objects continuity throughout Aristochart. These merges are completed within the constructor during initilization. To edit any options after initilizing Aristochart, you can access the options object at <code>&lt;instance>.options</code> and edit at will but changes will not appear till <code>&lt;instance>.render</code> is called.</p>
+				<p>The <code>options</code> object is where Aristochart takes all it's settings from. There is only one property required in the options object and that's the <code>data</code> property. See <a href="#doc.data">Data</a> for more information. Once passed, the object runs through a number of merges. First of all, the options object is merged with the theme passed if any, writing any settings not set by the user. Next, it's merged with the defaults and overwrites any settings not set by the user or theme. This is done to ensure the objects continuity throughout Aristochart. These merges are completed within the constructor during initialization. To edit any options after initializing Aristochart, you can access the options object at <code>&lt;instance>.options</code> and edit at will but changes will not appear till <code>&lt;instance>.render</code> is called.</p>
 				<h3><em>&lt;instance&gt;</em>.render( )</h3> 
 				<p>Renders the chart onto the supplied or generated <span class="tag">canvas</span>.</p>
 				<h3><em>&lt;instance&gt;</em>.getPoints( ) <span>{ origin, points }</span></h3>
@@ -90,6 +256,10 @@
 				<h2>Changelog</h2>
 				<div class="changelog">
 					<p>Upcoming release: <span class="version">v0.3</span></p>
+					<ul>
+						<li>jQuery support.</li>
+						<li>Legible documentation.</li>
+					</ul>
 					<p>Release: <span class="version">v0.2</span> <a href="https://github.com/dunxrion/aristochart/archive/v0.2.zip">(download)</a></p>
 					<ul>
 						<li>Data is handled better on negative axes.</li>
@@ -111,6 +281,7 @@
 <script type="text/javascript">
 	var sidebar = document.getElementById("sidebar");
 
+	//Scrolling sidebar
 	window.addEventListener("scroll", function() {
 		var scroll = document.body.scrollTop < 0 ? 0 : document.body.scrollTop;
 		sidebar.style.marginTop = (scroll > 72 ? -60 : -(scroll) + 14) + "px";	
@@ -135,8 +306,35 @@
 	})(document.getElementById("sidebar").children);
 
 	//Add the id's to the headers
-	Array.prototype.forEach.call(document.querySelectorAll("h1, h2, h3"), function(h) {
+	Array.prototype.forEach.call(document.querySelectorAll("h2"), function(h) {
 		if(!h.id) h.id = namespace + h.innerText.toLowerCase();
 	});
+
+	//Make the options view pretty
+	var optionsView = document.getElementById("options-view");
+	optionsView.innerHTML = (function(text) {
+		text = text.replace(/\t/g, "  "); //replace tabs
+		text = text.replace(/((?:\"|')[^\"']*(?:\"|'))/g, "<span class=\"quote\">$1</span>"); //Quotes
+		text = text.replace(/\b(true|false)\b/g, "<span class=\"keyword\">$1</span>")
+		text = text.replace(/(\w+)\:/g, "<span class=\"prop\">$1</span>:"); //properties
+		text = text.replace(/(\/\/.*)/g, "<span class=\"comment\">$1</span>");
+		text = text.replace(/\b([0-9]+)\b/g, "<span class=\"number\">$1</span>");
+
+		return text;
+	})(optionsView.innerText);
+
+	Array.prototype.forEach.call(optionsView.getElementsByClassName("comment"), function(comment) {
+		var commentText = comment.innerText;
+
+		comment.innerText = "[..]";
+
+		comment.addEventListener("mouseover", function() {
+			comment.innerText = commentText;
+		});
+
+		comment.addEventListener("mouseout", function() {
+			comment.innerText = "[..]";
+		})
+	})
 </script>
 </html>
