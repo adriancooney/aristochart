@@ -29,6 +29,7 @@ var Aristochart = function(element, options, theme) {
 	//Set the defaults
 	this.defaults = Aristochart.themes.default;
 
+	// Bind the parameters to the instance
 	this.options = options;
 	this.canvas = element;
 	this.theme = theme;
