@@ -193,7 +193,7 @@ table {
 			text-align: center;
 		}
 
-		td:last-child {
+		td:nth-child(3), td:nth-child(4) {
 			font-family: monospace;
 			font-size: 110%;
 			color: darken(@blue, 20%);
@@ -202,6 +202,20 @@ table {
 				font-family: Helvetica;
 				font-size: 90%;
 				color: #000;
+
+				span {
+					color: rgba(0,0,0,0.6);
+					font-family: monospace;
+					font-size: 115%;
+				}
+
+				span:before {
+					content: '(';
+				}
+
+				span:after {
+					content: ')';
+				}
 			}
 		}
 	}
@@ -358,6 +372,7 @@ footer {
 	#sidebar {
 		position: fixed;
 		margin-top: 14px;
+		width: 180px;
 
 		h3 {
 			font-size: 18px;
@@ -464,6 +479,11 @@ footer {
 		.number {
 			color: #000;
 		}
+	}
+
+	img {
+		width: @content_width * 0.8;
+		margin: 0;
 	}
 }
 

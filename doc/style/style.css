@@ -145,15 +145,31 @@ table td:last-child {
 table tr td:first-child {
   text-align: center;
 }
-table tr td:last-child {
+table tr td:nth-child(3),
+table tr td:nth-child(4) {
   font-family: monospace;
   font-size: 110%;
   color: #19788b;
 }
-table tr td:last-child em {
+table tr td:nth-child(3) em,
+table tr td:nth-child(4) em {
   font-family: Helvetica;
   font-size: 90%;
   color: #000;
+}
+table tr td:nth-child(3) em span,
+table tr td:nth-child(4) em span {
+  color: rgba(0, 0, 0, 0.6);
+  font-family: monospace;
+  font-size: 115%;
+}
+table tr td:nth-child(3) em span:before,
+table tr td:nth-child(4) em span:before {
+  content: '(';
+}
+table tr td:nth-child(3) em span:after,
+table tr td:nth-child(4) em span:after {
+  content: ')';
 }
 table tr:last-child th,
 table tr:last-child td {
@@ -272,6 +288,7 @@ footer p a {
 .documentation #sidebar {
   position: fixed;
   margin-top: 14px;
+  width: 180px;
 }
 .documentation #sidebar h3 {
   font-size: 18px;
@@ -356,6 +373,10 @@ footer p a {
 }
 .documentation #options-view .number {
   color: #000;
+}
+.documentation img {
+  width: 768px;
+  margin: 0;
 }
 .home .flap-active {
   -webkit-transform: translate(0, 0);

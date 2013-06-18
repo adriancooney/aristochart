@@ -32,25 +32,53 @@
 				<p>Aristochart works by rendering graph data onto the <span class="tag">canvas</span> element. Canvas is fast and requires very little resources to render. This brings up the question of browser compatibility. Currently <a href="http://caniuse.com/canvas">all major browsers support the canvas element</a> but IE 6, 7 and 8 are left out in the cold. There are no plans to support these browsers in the near future.</p>
 
 				<h2>Theming</h2>
-				<p>Aristochart itself is more of a data manager, it's the theme that takes control of rendering the data on screen. Aristochart comes with a default set of render functions, each of which can be overridden by a theme. Below is a list of features that can be implemented by the theme and the data that is sent to each feature's render function.</p>
+				<p>Aristochart itself is more of a data manager, it's the theme that takes control of rendering the data on screen. Aristochart comes with a default set of render functions, each of which can be overridden by a theme. Below is a list of features that can be implemented by the theme and the data that is sent to each feature's render function. See <a href="image/poorly_pointed_out_features_on_graph.jpg" target="_blank">here</a> for a less than pretty view of the features are on the default theme. See <a href="https://github.com/dunxrion/aristochart/blob/master/Aristochart.js#L203-275" target="_blank">here</a> for the code on how different features are called.</p></br>
+				<p>The <code>style</code> object that is sent as the first parameter to all the functions is the style properties declared in the <code>options.style</code> for each feature. For example, the point feature gets sent <code>options.style.&lt;lineName>.line</code> or if there is not style specifically associated with that line, <code>options.style.default.line</code>. Remember that your theme is merged with the <code>options</code> object so styles not explicitedly overridden by the user will default to your theme. The style object should consist of variable properties related to style that can be easily substituted in your render functions such as colors, stroke widths or offsets and all default values should go in <code>style.default</code>.</p>
 				<table>
 					<tr>
-						<th>Feature</th><th>Description</th><th>Parameters</th>
+						<th>Feature</th><th>Description</th><th>Parameters</th><th>Default</th>
 					</tr>
 					<tr>
 						<td>Point</td>
 						<td><p>A point on the graph.</p></td>
 						<td><p>style <em>Style object</em>, rx <em>Raster coord x</em>, ry <em>Raster coord y</em>, x <em>Data x</em>, y <em>Data y</em>, graph <em>Line Name</em></p></td>
+						<td><a href="https://github.com/dunxrion/aristochart/blob/master/Aristochart.js#L354-364" target="_blank">Aristochart.point.circle</a></td>
 					</tr>
 					<tr>
 						<td>Axis</td>
-						<td><p>The graph's axis lines</p></td>
-						<td><p>style <em>Style object</em>, x <em>Start of the line x coord</em>, y <em>Start of the line y coord</em>, x1 <em>End of the line x coord</em>, y1 <em>End of the line y coord</em>, type <em>Axis type</em></p></td>
+						<td><p>The graph's axis lines.</p></td>
+						<td><p>style <em>Style object</em>, x <em>Start of the line x coord <span>int</span></em>, y <em>Start of the line y coord <span>int</span></em>, x1 <em>End of the line x coord <span>int</span></em>, y1 <em>End of the line y coord <span>int</span></em>, type <em>Axis type <span>"x"|"y"</span></em></p></td>
+						<td><a href="https://github.com/dunxrion/aristochart/blob/master/Aristochart.js#L441-450" target="_blank">Aristochart.axis.line</a></td>
 					</tr>
 					<tr>
 						<td>Line</td>
-						<td><p>The graph's lines</p></td>
+						<td><p>The graph's lines.</p></td>
 						<td><p>style <em>Style object</em>, points <em>An array of Points <code>{rx, ry, x, y}</code></em></p></td>
+						<td><a href="https://github.com/dunxrion/aristochart/blob/master/Aristochart.js#L368-380" target="_blank">Aristochart.line.line</a></td>
+					</tr>
+					<tr>
+						<td>Fill</td>
+						<td><p>The fill underneath a line.</p></td>
+						<td><p>style <em>Style object</em>, points <em>An array of Points <code>{rx, ry, x, y}</code></em></p></td>
+						<td><a href="https://github.com/dunxrion/aristochart/blob/master/Aristochart.js#L382-399" target="_blank">Aristochart.line.fill</a></td>
+					</tr>
+					<tr>
+						<td>Tick</td>
+						<td><p>The graph's ticks along the axes.</p></td>
+						<td><p>style <em>Style object</em>, rx <em>Raster x coord <span>int</span></em>, ry <em>Raster y coord <span>int</span></em>, type <em>The axis type <span>"x"|"y"</span></em></td>
+						<td><a href="https://github.com/dunxrion/aristochart/blob/master/Aristochart.js#L403-437" target="_blank">Aristochart.tick.line</a></td>
+					</tr>
+					<tr>
+						<td>Label</td>
+						<td><p>The numbers along the axis.</p></td>
+						<td><p>style <em>Style object</em>, text <em>The string to print <span>string</span></em>, rx <em>Raster x coord <span>int</span></em>, ry <em>Raster y coord <span>int</span></em>, type <em>The axis type <span>"x"|"y"</span></em></td>
+						<td><a href="https://github.com/dunxrion/aristochart/blob/master/Aristochart.js#L454-468" target="_blank">Aristochart.label.text</a></td>
+					</tr>
+					<tr>
+						<td>Title</td>
+						<td><p>The axis titles.</p></td>
+						<td><p>style <em>Style object</em>, text <em>The string to print <span>string</span></em>, rx <em>Raster x coord <span>int</span></em>, ry <em>Raster y coord <span>int</span></em>, type <em>The axis type <span>"x"|"y"</span></em></td>
+						<td><a href="https://github.com/dunxrion/aristochart/blob/master/Aristochart.js#L472-488" target="_blank">Aristochart.title.text</a></td>
 					</tr>
 				</table>
 
@@ -233,6 +261,8 @@
 				</ol>
 				<p>This is Aristochart's constructor. If you pass a <span class="tag">canvas</span>, Aristochart will render onto this. If you pass a wrapper, Aristochart will generate the <span class="tag">canvas</span> and append it into the wrapper. If no elements are passed, Aristochart will generate a <span class="tag">canvas</span> and will make it accessible via <code>&lt;instance>.canvas</code> for your own placement at a later time.</p>
 				<p>The <code>options</code> object is where Aristochart takes all it's settings from. There is only one property required in the options object and that's the <code>data</code> property. See <a href="#doc.data">Data</a> for more information. Once passed, the object runs through a number of merges. First of all, the options object is merged with the theme passed if any, writing any settings not set by the user. Next, it's merged with the defaults and overwrites any settings not set by the user or theme. This is done to ensure the objects continuity throughout Aristochart. These merges are completed within the constructor during initialization. To edit any options after initializing Aristochart, you can access the options object at <code>&lt;instance>.options</code> and edit at will but changes will not appear till <code>&lt;instance>.render</code> is called.</p>
+				<h3><em>&lt;instance&gt;</em>.update( )</h3>
+				<p>Updates all of Aristochart's graphs variables such as the graph bounds and axis steps. This function should be called if the <code>data</code> property was updated on a graph.</p>
 				<h3><em>&lt;instance&gt;</em>.render( )</h3> 
 				<p>Renders the chart onto the supplied or generated <span class="tag">canvas</span>.</p>
 				<h3><em>&lt;instance&gt;</em>.getPoints( ) <span>{ origin, points }</span></h3>
@@ -246,11 +276,15 @@
 				<h3><em>Aristochart</em>.point|line|tick|axis|label|title</h3>
 				<p>These variables are where Aristochart's feature's render functions are stored. These stores hold the functions that render specific items onto the canvas. <code>Aristochart.point.circle</code> for example renders the graph points you see in the default theme. See <a href="#doc.theming">Theming</a> for information on parameters passed to these functions and how to implement your own functions.</p>
 
+				<h2>Dimensions</h2>
+				<p>Below is an image depicting the margin and padding properties that can be passed in the options object.</p>
+				<p><img src="image/graph_metrics.jpg" /></p>
 				<h2>Roadmap</h2>
 				<ul>
 					<li>Expand to pie charts, histograms etc.</li>
 					<li>Animation</li>
 					<li>Input functions as data.</li>
+					<li>Legend.</li>
 				</ul>
 
 				<h2>Changelog</h2>

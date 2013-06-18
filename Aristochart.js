@@ -77,6 +77,9 @@ var Aristochart = function(element, options, theme) {
 	// Set the resolution
 	this.resolution = window.devicePixelRatio || 1;
 
+	//Update/initlize the graph variables
+	this.update()
+
 	// And render this bitch
 	if(this.options.render) this.render();
 };
@@ -135,10 +138,10 @@ Aristochart.prototype.refreshBounds = function() {
 }
 
 /**
- * Render the graph and data
+ * Updates Aristochart's variables such as maxes and mins of the graphs
  * @return {null} 
  */
-Aristochart.prototype.render = function() {
+Aristochart.prototype.update = function() {
 
 	// Apply the resolution to all the dimensions
 	var resolution = this.resolution;
@@ -155,34 +158,19 @@ Aristochart.prototype.render = function() {
 		y1: this.options.height - (2*this.options.margin)
 	};
 
-	// Refresh the maxes
+	// Refresh the bounds of the graph
 	this.refreshBounds();
 
-	var that = this,
+	//Get the data set the lines and origin properties
+	var data = this.getPoints();
+	this.lines = data.lines;
+	this.origin = data.origin;
 
-		//Get the data
-		data = this.getPoints(),
-		lines = data.lines,
-		origin = data.origin,
-		defaults = that.options.style.default;
+	//Update the axis dimensions
+	var padding = this.options.padding,
+		box = this.box;
 
-	// Clear the canvas
-	this.canvas.width = this.canvas.width;
-
-	//Sanitize some variables
-	var stepX = Math.floor(that.options.axis.x.steps),
-		stepY = Math.floor(that.options.axis.y.steps);
-
-
-	var padding = that.options.padding,
-		box = that.box,
-		ox = origin.x,
-		oy = origin.y;
-
-	console.log("Origin x, y: ", ox, oy);
-
-	//Dimensions
-	var axis = {
+	this.axis = {
 		x: {
 			x: box.x - padding,
 			y: (box.y + box.y1 + padding),
@@ -197,8 +185,34 @@ Aristochart.prototype.render = function() {
 			y1: box.y + box.y1 + padding
 		}
 	};
+};
 
-	// Iterate over indexes and render the features appropriately 
+/**
+ * Render the graph and data
+ * @return {null} 
+ */
+Aristochart.prototype.render = function() {
+
+	var that = this,
+		lines = this.lines,
+		origin = this.origin,
+		axis = this.axis,
+		defaults = that.options.style.default;
+
+	// Clear the canvas
+	this.canvas.width = this.canvas.width;
+
+	//Can't have floating steps now can we..
+	var stepX = Math.floor(this.options.axis.x.steps),
+		stepY = Math.floor(this.options.axis.y.steps);
+
+	//Create some temporary caching variables
+	var padding = this.options.padding,
+		box = this.box,
+		ox = origin.x,
+		oy = origin.y;
+
+	// Iterate over indexes and render the features in order 
 	this.indexes.forEach(function(feature) {
 		switch(feature) {
 			case "point":
@@ -297,34 +311,34 @@ Aristochart.prototype.getPoints = function(callback) {
 		Yorigin = by + ((by1/Yrange) * Ymax),
 		Xorigin = bx + ((bx1/Xrange) * Math.abs(Xmin));
 
-	//Iterate over y1, y2 etc.
+	//Iterate over y1, y2 etc. lines
 	for(var key in this.data) {
-		if(key !== "x") {
-			lines[key] = [];
+		if(key == "x") continue;
 
-			var currArr = this.data[key],
-				length = currArr.length,
-				factor = 1;
+		lines[key] = [];
 
-			// Compensate for HUGE data set, only take a few data points
-			if(length > 1000) factor = 5;
-			if(length > 10000) factor = 50;
-			if(length > 100000) factor = 5000;
+		var currArr = this.data[key],
+			length = currArr.length,
+			factor = 1;
 
-			var count = length/factor;
+		// Compensate for HUGE data set, only take a few data points
+		if(length > 1000) factor = 5;
+		if(length > 10000) factor = 50;
+		if(length > 100000) factor = 5000;
 
-			for(var i = 0; i < count; i++) {
-				var x = ((Xrange/(count - 1)) * i) + Xmin,
-					y = currArr[i],
+		var count = length/factor;
 
-					// Calculate the raster points
-					rx = Xorigin + ((bx1/Xrange) * x),
-					ry = Yorigin - ((by1/Yrange) * y);
+		for(var i = 0; i < count; i++) {
+			var x = ((Xrange/(count - 1)) * i) + Xmin,
+				y = currArr[i],
 
-				lines[key].push({x: x, y: y, rx: rx, ry: ry});
+				// Calculate the raster points
+				rx = Xorigin + ((bx1/Xrange) * x),
+				ry = Yorigin - ((by1/Yrange) * y);
 
-				if(callback) callback(rx, ry, x, y, key);
-			}
+			lines[key].push({x: x, y: y, rx: rx, ry: ry});
+
+			if(callback) callback(rx, ry, x, y, key);
 		}
 	}
 
