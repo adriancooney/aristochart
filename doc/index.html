@@ -23,9 +23,9 @@
 				<div><span>Theming</span></div>
 				<div><span>Data</span></div>
 				<div><span>Options</span></div>
-				<div><span>Dimensions</span></div>
 				<div><span>API</span></div>
-				<div><span>Roadmap</span></div>
+				<div><span>Dimensions</span></div>
+				<div><span>Pipeline</span></div>
 				<div><span>Changelog</span></div>
 			</div><div class="column wider">
 				<h2>General</h2>
@@ -83,74 +83,79 @@
 				</table>
 
 				<h2>Data</h2>
+				<p>Aristochart strived to make inputting data as simple as possible. To add data to an Aristochart graph, you edit the <code>data</code> property of your options object. You need to include an x dataset and at least one y dataset. A dataset, is an array of numbers you want to display on the graph.</p><br>
+				<p>The x dataset is special as there can only be one. It dictates how the horizontal axis reacts to the inputted y data. It allows Aristochart to determine and generate the horizontal labels. The x dataset can be an integer, a range in the form of <code>[upper, lower]</code> or an array of numbers. If given an array of numbers, it will only select the first and last integers and determine the labels.</p><br>
+				<p>The y dataset is what you see being outputted onto the graph. Aristochart allows you to input as many y datasets as you want in the form of <code>y, y1, y2, yn</code>. Each one will form their own line on the graph and be rendered in order. Each line can be styled individually by creating a style object for that line under <code>options.style.&lt;line></code>. Each individual style is then merged with the default.</p>
 
 				<h2>Options</h2>
-				<p>Aristochart has a vast amount of options, each of which can be overridden by a theme and then the user. Below is a the default options, each of which can be overridden.</p>
+				<p>Aristochart has a vast amount of options, each of which can be overridden by a theme and then the user. Below is a the default options, each of which can be overridden. <strong>All the data in the <code>style</code> property is sent to that specific feature's render function so if you change the render function, these styles may not apply.<strong></p>
 				<pre id="options-view">
 {
-	width: 640, //Width in pixels
-	height: 400, //Height in pixels
+	width: 640, //Width of the graph in pixels
+	height: 400, //Height of the graph in pixels
 	margin: 70, //Margin between the axis and border. See dimensions.
 	padding: 20, //Padding between the axis and data. See dimensions.
 	render: true, //Toggle Aristochart automatically calling .render
 
-	fill: { //The fill feature. The fill under the graph.
+	fill: { //The fill feature which fill under any given line.
 		index: 0, //The features index. Each feature has its own.
-		render: Aristochart.line.fill, //The line fills render function
-		fillToBaseLine: true, //Toggle filling to the baseline.
+		render: Aristochart.line.fill, //The default fill render function
+		fillToBaseLine: true, //Toggle filling to the baseline (or x axis).
 	},
 
-	axis: {
+	axis: { //The axis feature which renders the axes
 		index: 1,
-		render: Aristochart.axis.line,
+		render: Aristochart.axis.line, //The default axis render function
 
 		x: {
-			steps: 5,
-			render: Aristochart.axis.line,
+			steps: 5, //The amount of steps on the x axis
+			render: Aristochart.axis.line  //X specific axis render function
 		},
 
 		y: {
-			steps: 10,
-			render: Aristochart.axis.line,
+			steps: 10, //The amount of steps on the y axis
+			render: Aristochart.axis.line //Y specific axis render function
 		}
 	},
 
 	tick: {
 		index: 2,
-		render: Aristochart.tick.line
+		render: Aristochart.tick.line //The default tick render function
 	},
 
 	line: {
 		index: 3,
-		render: Aristochart.line.line
+		render: Aristochart.line.line //The default line render function
 	},
 
 	point: {
 		index: 4,
-		render: Aristochart.point.circle
+		render: Aristochart.point.circle //The default point render function
 	},
 
 	label: {
 		index: 5,
 		render: Aristochart.label.text,
+
 		x: {
-			step: 1
+			step: 1 //The x axis label step/increment.
 		},
+
 		y: {
-			step: 1
+			step: 1 //The y axis label step/increment.
 		}
 	},
 
 	title: {
 		index: 6,
-		render: Aristochart.title.text,
-		x: "x",
-		y: "y"
+		render: Aristochart.title.text, //The default title render function
+		x: "x", //The x axis title
+		y: "y" //The y axis title
 	},
 
-	style: {
-		default: {
-			point: {
+	style: { //The style object
+		default: { 
+			point: { //The styles sent to the point render function
 				stroke: "#000",
 				fill: "#fff",
 				radius: 4,
@@ -158,47 +163,47 @@
 				visible: true
 			},
 
-			line: {
+			line: { //The styles sent to the line render function
 				stroke: "#298281",
 				width: 3,
 				fill: "rgba(150, 215, 226, 0.4)",
 				visible: true
 			},
 
-			axis: {
+			axis: { //The styles sent to the axis render function
 				stroke: "#ddd",
 				width: 3,
 				visible: true,
 
 				x: {
 					visible: true,
-					fixed: true
+					fixed: true //Determines whether the axis is fixed to the bottom
 				},
 
 				y: {
 					visible: true,
-					fixed: true
+					fixed: true //Determines whether the axis is fixed to the left
 				}
 			},
 
 			tick: {
-				align: "middle", //"outside", "inside",
+				align: "middle", //The tick alignment; "outside", "inside",
 				stroke: "#ddd",
 				width: 2,
-				minor: 10,
-				major: 15,
+				minor: 10, //The length of the minor ticks in pixels
+				major: 15, //The length of the major ticks in pixels
 				visible: true,
 
 				x: {
-					fixed: true
+					fixed: true //Determines whether the ticks are fixed to the bottom
 				},
 
 				y: {
-					fixed: true	
+					fixed: true	//Determines whether the ticks are fixed to the left
 				}
 			},
 
-			label: {
+			label: { //The label styling
 				x: {
 					font: "Helvetica",
 					fontSize: 14,
@@ -226,7 +231,7 @@
 				}
 			},
 
-			title: {
+			title: { //The title styling
 				color: "#777",
 				font: "georgia",
 				fontSize: "16",
@@ -279,12 +284,13 @@
 				<h2>Dimensions</h2>
 				<p>Below is an image depicting the margin and padding properties that can be passed in the options object.</p>
 				<p><img src="image/graph_metrics.jpg" /></p>
-				<h2>Roadmap</h2>
+				<h2>Pipeline</h2>
 				<ul>
 					<li>Expand to pie charts, histograms etc.</li>
-					<li>Animation</li>
+					<li>Animation.</li>
 					<li>Input functions as data.</li>
 					<li>Legend.</li>
+					<li>Text labels.</li>
 				</ul>
 
 				<h2>Changelog</h2>

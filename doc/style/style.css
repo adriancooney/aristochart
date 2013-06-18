@@ -120,6 +120,9 @@ p .version {
   font-size: 120%;
   color: #fc356c;
 }
+p strong {
+  font-weight: bold;
+}
 ul li {
   list-style-type: disc;
   margin-left: 18px;

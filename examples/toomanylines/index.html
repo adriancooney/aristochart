@@ -1,0 +1,94 @@
+<html>
+<head>
+	<title>Too many lines</title>
+	<link href="../../doc/style/style.css" rel="stylesheet" type="text/css" />
+	<script src="../../doc/script/Sintax.js" type="text/javascript"></script>
+	<script src="../../doc/script/Examples.js" type="text/javascript"></script>
+</head>
+<!-- Example checklist:
+	Edited the head's title?
+	Edited the description paragraph? (#description)
+	Added your example's code to the script tag below with the id 'example-code'?
+	Renamed parent folder to the examples name? 
+	Added it to the example list in examples/index.html?
+	Submitted a pull request?
+
+	Don't be afraid to change the layout but try to maintain some sort of continuity.
+-->
+<body>
+	<header>
+		<div class="wrapper">
+			<h1><em>Aristo</em>chart</h1>
+			<nav>
+				<li><a href="../../index.html">Home</a></li>
+				<li><a href="../../doc/index.html">Documentation</a></li>
+				<li><a href="../index.html" class="highlighted">Examples</a></li>
+				<li><a href="../../themes/index.html">Themes</a></li>
+				<li><a href="https://github.com/dunxrion/aristochart" class="github">Github</a></li>
+			</nav>
+		</div>
+	</header>
+	<div class="content examples">
+		<div class="wrapper">
+			<p class="back"><a href="../index.html">&larr; Back to examples</a></p>
+			<h2>Description</h2>
+			<p id="description">And example with an unreasonable amount of lines.</p>
+			<h2>Code</h2>
+			<pre id="input-code"></pre>
+			<h2>Output</h2>
+			<div id="holder"></div>
+		</div>
+	</div>
+	<footer>
+		<div class="wrapper">
+			<p>An open-source project by <a href="http://adriancooney.ie">Adrian Cooney</a>.</p>
+		</div>
+	</footer>
+</body>
+<!-- You edit below this line -->
+<script src="../../Aristochart.js" type="text/javascript"></script>
+<script type="text/javascript" id="example-code">
+// Add your example
+var holder = document.getElementById("holder");
+
+var data = {
+	x: 10
+};
+
+var style = {
+	default: {
+		point: {
+			visible: false
+		},
+
+		line: {
+			width: 1
+		}
+	}
+}
+
+//Generate the lines
+for(var i = 0, max = 100; i < max; i++) {
+	var line = "y" + (i ? i : ""); //y, y1, y2 yn
+	//Generate an array of data and stick it in the data object
+	data[line] = (function() {
+		var arr = [Math.floor(Math.random() * 50)];
+		for(var i = 0; i < 80; i++) arr.push(arr[i] + 1*(Math.random() > 0.5 ? -1 : 1));
+		return arr;
+	})();
+
+	//Generate varying colors
+	var color = Math.floor((i/max) * 255);
+	style[line] = {
+		line: {
+			stroke: "rgb(" + [color, 255 - color, Math.floor(Math.random() * 255)].join(", ") + ")"
+		}
+	}
+}
+
+var graph = new Aristochart(holder, {
+	data: data,
+	style: style
+});
+</script>
+</html>
