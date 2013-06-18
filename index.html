@@ -24,9 +24,9 @@
 					<h1>Simple <br>and <em>sophisticated</em> static <br>2D<br> line charts.</h1>
 				</div>
 			</section>
-			<section class="features">
+			<section>
 				<div class="column wide">
-						<p>Aristochart is highly customizable and flexible line charting library for <span class="tag">canvas</span>. Aristochart allows you to focus on aesthetic while it handles and manipulates the data.</p>
+						<p class="biggish">Aristochart is highly customizable and flexible line charting library for <span class="tag">canvas</span>. Aristochart allows you to focus on aesthetic while it manages the data behind the scenes.</p>
 					<!-- <div class="column half">
 						<h3>Features</h3>
 						<ul>
@@ -45,6 +45,33 @@
 					</div>
 				</div>
 			</section>
+			<hr>
+			<section>
+				<div class="column quarter">
+					<h3>Themes</h3>
+					<p>Aristochart has a growing list of community sourced themes for you to pick and choose from.</p>
+				</div><div class="column threequarters themes">
+					<div id="theme-orange"></div>
+					<div id="theme-dot"></div>
+					<div id="theme-flat"></div>
+				</div>
+			</section>
+			<hr>
+			<section><div class="column twothirds themes">
+				<pre>
+new Aristochart(document.getElementById("holder"), {
+	data: {
+		x: 10,
+		y: [0, 1, 2, 3, 4, 5, 6, 6, 5, 4, 3, 3, 4, 5, 6, 7, 8, 9, 10],
+		y1: [10, 9, 8, 7, 7, 6, 2, 1, 1, 1],
+		y2: [4, 4, 4, 3, 3, 2, 2, 1, 0, 0, 0, 0]
+	}
+}, theme);</pre>
+				</div><div class="column third">
+					<h3>API</h3>
+					<p>Aristochart's API was designed to be as simple as possible to allow you to focus on the aesthetic and presentation.</p>
+				</div>
+			</section>
 		</div>
 	</div>
 	<footer>
@@ -53,11 +80,15 @@
 		</div>
 	</footer>
 </body>
+<script src="doc/script/Sintax.js" type="text/javascript"></script>
 <script src="Aristochart.js" type="text/javascript"></script>
+<script src="themes/dot/dot.js" type="text/javascript"></script>
+<script src="themes/flat/flat.js" type="text/javascript"></script>
+<script src="themes/orange/orange.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 	//Print the chart mustache!
-	var graph = new Aristochart(document.getElementById("holder"), {
+	new Aristochart(document.getElementById("holder"), {
 		width: 700,
 
 		axis: {
@@ -74,5 +105,51 @@
 			y2: [14, 6, 3, 2, 2, 2, 4, 7, 4, 2, 2, 2, 3, 6, 14]
 		}
 	});
+
+	//Print the themes
+	["orange", "dot", "flat"].forEach(function(theme) {
+		new Aristochart(document.getElementById("theme-" + theme), {
+			padding: 10,
+			margin: 15,
+			width: 236,
+			data: {
+				x: 10,
+				y: [0, 1, 2, 3, 4, 5, 6, 6, 5, 4, 3, 3, 4, 5, 6, 7, 8, 9, 10],
+				y1: [10, 9, 8, 7, 7, 6, 2, 1, 1, 1],
+				y2: [4, 4, 4, 3, 3, 2, 2, 1, 0, 0, 0, 0]
+			},
+
+			style: {
+				default: {
+					label: {
+						x: {
+							visible: false
+						},
+
+						y: {
+							visible: false
+						}
+					},
+
+					point: {
+						radius: 3,
+						width: 2
+					},
+
+					axis: {
+						width: 2
+					},
+
+					tick: {
+						major: 9,
+						minor: 5
+					}
+				}
+			}
+		}, Aristochart.themes[theme]);
+	});
+
+	//Sintax highlighting
+	Sintax.highlight()
 </script>
 </html>

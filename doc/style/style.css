@@ -52,6 +52,18 @@ a {
 .column.thinner {
   width: 20%;
 }
+.column.quarter {
+  width: 25%;
+}
+.column.threequarters {
+  width: 75%;
+}
+.column.third {
+  width: 30%;
+}
+.column.twothirds {
+  width: 70%;
+}
 code,
 pre {
   margin: 30px;
@@ -62,6 +74,7 @@ pre {
   border-radius: 6px;
   color: rgba(0, 0, 0, 0.6);
   overflow-x: scroll;
+  line-height: 110%;
 }
 code {
   padding: 2px 4px;
@@ -417,4 +430,29 @@ footer p a {
 }
 .home ul li:before {
   content: '\27dc  ';
+}
+.home .biggish {
+  font-size: 160%;
+}
+.home .themes div {
+  display: inline-block;
+}
+.home hr {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 30px 0;
+}
+.home h3 {
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: bold;
+  font-size: 52px;
+  font-style: normal;
+  padding: 0;
+  border: none;
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+.home pre {
+  margin: 0;
+  margin-right: 16px;
+  margin-top: 14px;
 }

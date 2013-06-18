@@ -26,7 +26,7 @@ var Sintax = {
 		var keywords = {
 			//Javascript keywords
 			"js": ["var", "new", "function", "return"],
-			"element": ["document"],
+			"element": ["document", "Aristochart"],
 
 			//Types
 			"type": ["Object", "Number", "String", "Array", "Boolean"],

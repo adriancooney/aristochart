@@ -74,10 +74,10 @@ var Aristochart = function(element, options, theme) {
 
 	// Fix for retina and other screen resolutions
 	if(window.devicePixelRatio > 1) {
-		this.canvas.height = this.options.height * window.devicePixelRatio;
-		this.canvas.width = this.options.width * window.devicePixelRatio;
-		this.canvas.style.height = this.options.height + "px";
-		this.canvas.style.width = this.options.width + "px";
+		this.canvas.style.height = this.canvas.height + "px";
+		this.canvas.style.width = this.canvas.width + "px";
+		this.canvas.height = this.canvas.height * window.devicePixelRatio;
+		this.canvas.width = this.canvas.width * window.devicePixelRatio;
 	}
 
 	// Set the resolution
