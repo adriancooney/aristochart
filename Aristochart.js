@@ -1,10 +1,15 @@
-
 /**
  * Aristochart.js
+ *
+ * http://dunxrion.github.com/aristochart
  * 
- * I am sick of all those sucky-overcomplicated 2D charting libraries
- * This will be a basic ridiculously customizable library that makes
- * things simple.
+ * @version 0.2
+ * @author Adrian Cooney <cooney.adrian@gmail.com> (http://adriancooney.ie)
+ * @license http://opensource.org/licenses/MIT
+ */
+
+/** 
+ * Aristochart's constructor.
  *
  * @param {Object} element The DOM element container or canvas to use
  * @param {Object} options See Options.
