@@ -251,6 +251,13 @@ header h1 em {
   font-size: 118%;
   letter-spacing: -2px;
 }
+header h1 img {
+  margin-right: 12px;
+}
+header h1 a {
+  color: inherit;
+  text-decoration: none;
+}
 footer {
   margin-top: 40px;
   background: #273137;
