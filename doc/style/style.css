@@ -59,10 +59,10 @@ a {
   width: 75%;
 }
 .column.third {
-  width: 30%;
+  width: 33%;
 }
 .column.twothirds {
-  width: 70%;
+  width: 66%;
 }
 code,
 pre {
@@ -455,4 +455,11 @@ footer p a {
   margin: 0;
   margin-right: 16px;
   margin-top: 14px;
+}
+.home .finally h3 {
+  font-size: 32px;
+  margin: 14px;
+}
+.home .finally p {
+  margin: 14px;
 }
