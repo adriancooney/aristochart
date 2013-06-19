@@ -70,15 +70,19 @@ pre {
   background: rgba(0, 0, 0, 0.065);
   border: 1px solid rgba(0, 0, 0, 0.12);
   padding: 12px 18px;
-  font-family: monospace;
+  font-family: Monaco, "Courier New", monospace;
   border-radius: 6px;
   color: rgba(0, 0, 0, 0.6);
   overflow-x: scroll;
   line-height: 110%;
+  font-size: 80%;
 }
 code {
   padding: 2px 4px;
   margin: 0;
+  background: #fafafa;
+  border: 1px solid #ddd;
+  color: #65656;
 }
 pre .number {
   color: #000;
