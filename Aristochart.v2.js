@@ -61,8 +61,14 @@ var Aristochart = function(elem, options, theme) {
 
 	//Bind the events
 	var that = this;
-	this.canvas.addEventListener("click", function(event) {
-		console.log(that.registry.objectUnder(event.offsetX, event.offsetY));
+	["click", "mouseover", "mouseout"].forEach(function(eventName) {
+		that.canvas.addEventListener(eventName, function(event) {
+			console.log(event);
+			that.registry.objectsUnder(event.offsetX, event.offsetY).forEach(function(primitive) {
+				console.log(primitive);
+				if(primitive.events[eventName]) primitive.events[eventName].call(that);
+			})
+		});
 	});
 };
 
@@ -308,13 +314,14 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 		this.scale = 1;
 		this.opacity = 0;
 		this.transitions = [];
+		this.r = 0;
 
+		//Set the canvas and ctx
 		this.canvas = canvas;
 		this.ctx = ctx;
 
-		this.box = {
-
-		};
+		//Add the primitive's events
+		this.events = obj.events || {};
 
 		//Merge
 		if(data) Aristochart._deepMerge(data, this)
@@ -336,14 +343,71 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 
 	};
 
-	//Create the class with the variable methods
-	Primitive.events = obj.events;
 	Primitive.prototype.render = obj.render;
 	Primitive.prototype.isInside = obj.isInside;
 	Primitive.prototype.getBoundingBox = obj.getBoundingBox;
 
 	return Primitive;
 };
+
+/**
+ * Aristochart's color class.
+ * @param {string} color Hex, rgb, rgba
+ */
+Aristochart.Color = function(color) {
+	color = this.parse(color);
+	this.r = color.r;
+	this.g = color.g;
+	this.b = color.b;
+	this.a = color.a;
+};
+
+Aristochart.Color.prototype.parse = function(color) {
+	var rgba = /rgb(a)?\s*\(((?:\s*(?:\d+\.\d+|\d+)\s*,?){3,4})\s*\)/;
+	var hex = /#(?:([a-f0-9]{6})|([a-f0-9]{3}))/;
+
+	if(rgba.exec(color)) {
+		var colors = RegExp.$2.split(",").map(function(val) { return val.trim(); });
+		if(RegExp.$1) { // Rgba
+			return {
+				r: parseInt(colors[0]),
+				g: parseInt(colors[1]),
+				b: parseInt(colors[2]),
+				a: parseFloat(colors[3]) || 1
+			}
+		} else {
+			return {
+				r: parseInt(colors[0]),
+				g: parseInt(colors[1]),
+				b: parseInt(colors[2]),
+				a: 1
+			}
+		}
+	} else if(hex.exec(color)) {
+		if(RegExp.$1) {
+			var hex = RegExp.$1;
+			hex = [hex.substr(0, 2), hex.substr(2, 2), hex.substr(4, 2)];
+		} else if(RegExp.$2) {
+			var hex = RegExp.$2;
+			hex = [hex[0] + hex[0], hex[1] + hex[1], hex[2] + hex[2]];
+		}
+
+		if(hex) hex = hex.map(function(hexdecimal) {
+			return parseInt(hexdecimal, 16);
+		});
+
+		return {
+			r: hex[0],
+			g: hex[1],
+			b: hex[2],
+			a: 1
+		}
+	}
+};
+
+Aristochart.Color.prototype.toString = function() {
+	return "rgba(" + [this.r, this.g, this.b, this.a].join(", ") + ")";
+}
 
 /**
  * The Aristochart registry
@@ -356,12 +420,12 @@ Aristochart.Registry = function(context) {
 
 Aristochart.Registry.prototype = {
 	/**
-	 * objectUnder -- Test to see if there is a primitive at coord x, y
+	 * objectsUnder -- Test to see if there is a primitive at coord x, y
 	 * @param  {int} x The x coordinate (raster)
 	 * @param  {int} y The y coordinate (raster)
 	 * @return {array}   Array of objects if any
 	 */
-	objectUnder: function(x, y) {
+	objectsUnder: function(x, y) {
 		var primitives = [];
 		for(var i = 0, cache = this.registry.length; i < cache; i++) {
 			if(this.registry[i].isInside(x, y)) primitives.push(this.registry[i]);
@@ -436,14 +500,17 @@ Aristochart.Themes.default = {
 
 			events: {
 				click: function() {
+					console.log("FART!");
 					this.highlighted = true;
 				},
 
 				mouseover: function() {
+					console.log("MOUSEOVER!");
 					this.mouseover = true;
 				},
 
 				mouseout: function() {
+					console.log("mouseout");
 					this.mouseover = false;
 				}
 			}
@@ -499,14 +566,16 @@ Aristochart.Themes.default = {
 			visible: true,
 
 			slice: {
-				//per slice styling etc.
-				y: {
-					a: 1
+				1: {
+					color: "#f00"
+				},
+
+				"sliceName": {
+					color: "#000"
 				},
 
 				default: {
 					visible: true,
-
 				}
 			}
 		}
