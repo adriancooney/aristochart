@@ -45,6 +45,9 @@ var Aristochart = function(elem, options, theme) {
 	//Append the canvas
 	if(this.wrapper) this.wrapper.appendChild(this.canvas);
 
+	//Validate some specific options
+	this.validateOptions();
+
 	//Validate and sanitize the data
 	this.validateData();
 
@@ -56,20 +59,47 @@ var Aristochart = function(elem, options, theme) {
 
 	//Create Aristochart's render engine
 	this.engine = new Aristochart.Engine(this, this.update, this.render);
-	//Check to see if the graph is not static and start the engine
-	if(!this.options.static) this.engine.start();
 
-	//Bind the events
-	var that = this;
-	["click", "mouseover", "mouseout"].forEach(function(eventName) {
-		that.canvas.addEventListener(eventName, function(event) {
-			console.log(event);
+	//Check to see if the graph is not static, start interactivity
+	if(!this.options.static) {
+		this.engine.start();
+
+		//Bind the events
+		var that = this;
+		this.canvas.addEventListener("click", function(event) {
 			that.registry.objectsUnder(event.offsetX, event.offsetY).forEach(function(primitive) {
-				console.log(primitive);
-				if(primitive.events[eventName]) primitive.events[eventName].call(that);
+				if(primitive.events.click) primitive.events.click.call(primitive);
 			})
 		});
-	});
+
+		//Handle mousemove over elements
+		var buffer = [];
+		this.canvas.addEventListener("mousemove", function(event) {
+			var current = that.registry.objectsUnder(event.offsetX, event.offsetY);
+
+			//Iterate over the current and call mouseover if not already
+			//else call mousemove and put it into a buffer
+			current.forEach(function(primitive) {
+				if(!primitive._mouseover) {
+					if(primitive.events.mouseover) primitive.events.mouseover.call(primitive);
+					primitive._mouseover = true;
+					buffer.push(primitive);
+				} else {
+					if(primitive.events.mousemove) primitive.events.mousemove.call(primitive);
+				}
+			});
+
+			//Check the buffer to see if the elements are still being hovered
+			//if not, remove it from the buffer and call mouseout
+			buffer.forEach(function(primitive, i) {
+				if(current.indexOf(primitive) == -1) {
+					if(primitive.events.mouseout) primitive.events.mouseout.call(primitive);
+					primitive._mouseover = false;
+					buffer.splice(i, 1);
+				}
+			});
+		});
+	}
 };
 
 /**
@@ -77,6 +107,24 @@ var Aristochart = function(elem, options, theme) {
  */
 Aristochart.DEBUG = true;
 Aristochart.supported = ["pie", "line"];
+
+/**
+ * Validates specific options such as margin or padding
+ * @return {null} 
+ */
+Aristochart.prototype.validateOptions = function() {
+	if(typeof this.options.padding == "number") this.options.padding = expand(this.options.padding)
+	if(typeof this.options.margin == "number") this.options.margin = expand(this.options.margin)
+
+	function expand(num) {
+		return {
+			top: num,
+			bottom: num,
+			left: num,
+			right: num
+		}
+	}
+};
 
 /**
  * Validates the inputted data
@@ -220,7 +268,7 @@ Aristochart.sanitize = {
 	 * Possible input:
 	 * 	{
 	 * 		x: int || [int] || [int, int] || [int, int, ..., int],
-	 * 		y: [int, ..., int],
+	 * 		y: [int, ..., int] || { fn, start: stop },
 	 * 		y1: [int, ..., int],
 	 * 		y2: [int, ..., int],
 	 * 		       ...
@@ -312,9 +360,7 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 		this.y = 0;
 		this.rotation = 0;
 		this.scale = 1;
-		this.opacity = 0;
 		this.transitions = [];
-		this.r = 0;
 
 		//Set the canvas and ctx
 		this.canvas = canvas;
@@ -324,26 +370,63 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 		this.events = obj.events || {};
 
 		//Merge
-		if(data) Aristochart._deepMerge(data, this)
-	};
+		if(data) Aristochart._deepMerge(data, this);
 
-	Primitive.prototype.update = function() {
-
+		//Custom initilization
+		if(obj.init) obj.init.call(this);
 	};
 
 	/**
-	 * Transition a property on a primitive
-	 * @param  {string} property The property to transition
+	 * For debug purposes. Renders a bounding box around an element.
+	 * @return {null}
+	 */
+	Primitive.prototype.drawBoundingBox = function() {
+		if(!this.getBoundingBox) Aristochart.Error("Primitive#drawBoundingBox: getBoundingBox not defined. Please define it if you want to draw the bounding box.");
+
+		var box = this.getBoundingBox();
+		this.ctx.save();
+		this.ctx.translate(this.x, this.y);
+		this.ctx.rotate(this.rotation);
+		this.ctx.beginPath();
+		this.ctx.strokeStyle = "#f00";
+		this.ctx.lineWidth = 3;
+		this.ctx.moveTo(box.x, box.y);
+		this.ctx.lineTo(box.x1, box.y);
+		this.ctx.lineTo(box.x1, box.y1);
+		this.ctx.lineTo(box.x, box.y1);
+		this.ctx.closePath();
+		this.ctx.stroke();
+		this.ctx.restore();
+	};
+
+	/**
+	 * Animate a properties on a primitive
+	 * @param  {object} properties The properties to transition eg. { x: { from: 0, to: 100 } }
 	 * @param  {int} frames   The frames for the transition to span
 	 * @param  {string} easing   Easing function
 	 * @param  {function} callback   Callback on complete
 	 * @return {null}
 	 */
-	Primitive.prototype.transition = function(property, frames, easing, callback) {
+	Primitive.prototype.animate = function(properties, frames, easing, callback) {
 
 	};
 
-	Primitive.prototype.render = obj.render;
+	Primitive.prototype.transition = function(transition, duration, easing, callback) {
+
+	};
+
+	/**
+	 * Primitive rendering. Aristochart translates and rotates instead of leaving that to the user
+	 * @return {null} 
+	 */
+	Primitive.prototype.render = function() {
+		ctx.save();
+		ctx.translate(this.x, this.y);
+		ctx.rotate(this.rotation);
+		obj.render.call(this);
+		ctx.restore();
+	};
+
 	Primitive.prototype.isInside = obj.isInside;
 	Primitive.prototype.getBoundingBox = obj.getBoundingBox;
 
@@ -362,6 +445,11 @@ Aristochart.Color = function(color) {
 	this.a = color.a;
 };
 
+/**
+ * Parse sting colors and outputs {r, g, b, a}
+ * @param  {String} color The color string, hex, rgba, rgb
+ * @return {Object}       {r, g, b, a}
+ */
 Aristochart.Color.prototype.parse = function(color) {
 	var rgba = /rgb(a)?\s*\(((?:\s*(?:\d+\.\d+|\d+)\s*,?){3,4})\s*\)/;
 	var hex = /#(?:([a-f0-9]{6})|([a-f0-9]{3}))/;
@@ -405,9 +493,13 @@ Aristochart.Color.prototype.parse = function(color) {
 	}
 };
 
+/**
+ * Convert convert color to rgba
+ * @return {String} rgba(r, g, b, a)
+ */
 Aristochart.Color.prototype.toString = function() {
 	return "rgba(" + [this.r, this.g, this.b, this.a].join(", ") + ")";
-}
+};
 
 /**
  * The Aristochart registry
@@ -440,7 +532,8 @@ Aristochart.Registry.prototype = {
 	 * @return {null}     
 	 */
 	add: function(obj) {
-		this.registry.push(obj);
+		if(obj instanceof Array) this.registry.concat(obj);
+		else this.registry.push(obj);
 	},
 
 	/**
@@ -449,7 +542,7 @@ Aristochart.Registry.prototype = {
 	 * @return {null}     
 	 */
 	remove: function(obj) {
-
+		this.registry.splice(this.registry.indexOf(obj), 1);
 	},
 
 	/**
@@ -468,7 +561,9 @@ Aristochart.Registry.prototype = {
 	 */
 	render: function() {
 		for(var i = 0, cache = this.registry.length; i < cache; i++) {
-			this.registry[i].render();
+			var primitive = this.registry[i];
+			if(Aristochart.DEBUG) primitive.drawBoundingBox();
+			primitive.render();
 		}
 	}
 };
@@ -482,15 +577,28 @@ Aristochart.Themes.default = {
 	static: false,
 	background: "#fff",
 
+	//Dimensions
+	padding: 10,
+	margin: 10,
+
 	line: {
 		point: {
+			init: function() {
+				console.log("I'm born!");
+			},
+
 			render: function() {
 				this.ctx.fillStyle = "#000";
 				this.ctx.fillRect(this.x, this.y, 10, 10);
 			},
 
 			getBoundingBox: function() {
-
+				return {
+					x: this.x,
+					x1: this.x + 10,
+					y: this.y,
+					y1: this.y + 10
+				}
 			},
 
 			isInside: function(x, y) {
@@ -507,6 +615,12 @@ Aristochart.Themes.default = {
 				mouseover: function() {
 					console.log("MOUSEOVER!");
 					this.mouseover = true;
+					this.x = this.x + 10;
+					this.y = this.y + 10;
+				},
+
+				mousemove: function() {
+					console.log("MOUSEMOVE!");
 				},
 
 				mouseout: function() {
