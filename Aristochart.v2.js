@@ -365,6 +365,7 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 		this.visible = true;
 		this.x = 0;
 		this.y = 0;
+		this.alpha = 1;
 		this.rotation = 0;
 		this.scale = 1;
 		this.animationBuffer = [];
@@ -392,8 +393,6 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 
 		var box = this.getBoundingBox();
 		this.ctx.save();
-		this.ctx.translate(this.x, this.y);
-		this.ctx.rotate(this.rotation);
 		this.ctx.beginPath();
 		this.ctx.strokeStyle = "#f00";
 		this.ctx.lineWidth = 3;
@@ -408,27 +407,21 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 
 	/**
 	 * Animate a properties on a primitive
-	 * @param  {object} properties The properties to transition eg. { x: value }
-	 * @param  {int} frames   The frames for the transition to span
+	 * @param  {object} properties The properties to animate eg. { x: value }
+	 * @param  {int} frames   The frames for the animate to span
 	 * @param  {string} easing   Easing function
 	 * @param  {function} callback   Callback on complete
 	 * @return {null}
 	 */
-	Primitive.prototype.animate = function(properties, duration, easing, callback) {
-		if(typeof easing == "function") callback = easing, easing = undefined;
+	Primitive.prototype.animate = function(properties, frames, callback, easing) {
+		if(typeof callback == "string") easing = callback;
 
 		for(var prop in properties) {
 			if(this[prop] == undefined) { Aristochart.Error("Primitive#Animate: Property '" + prop + "' does not exist."); continue; }
 			if(typeof this[prop] !== "number") { Aristochart.Error("Primitive#Animate: Property '" + prop + "' is not a number and is unanimatable"); continue; }
 			
-
-			/*
-			 * Take an example
-			 * 	ux = 10; uy = 40;
-			 * 	animate: x -> 20; y -> 10; (+10, -30)
-			 * 	vx = 20; vy = 10;
-			 */
-			var frames = 20,
+			//TODO: Dynamic time calculation based on FPS or per frame calculation
+			var frames = frames,
 				property = properties[prop],
 				range = property - this[prop];
 
@@ -448,13 +441,42 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 		}
 	};
 
-	Primitive.prototype.transition = function(transition, duration, easing, callback) {
+	Primitive.prototype.transition = function(transition, duration, callback, easing) {
+		//Convert the duration to frames
+		duration = (duration) ? duration * 60 : 60;
 
+		var animation;
+
+		switch(transition) {
+			case "fadeout":
+				animation = { alpha: 0 };
+			break;
+
+			case "fadein":
+				animation = { alpha: 1 };
+			break;
+
+			case "fadeinright":
+				var cache = this.x;
+				this.x = cache - 40;
+				animation = { alpha: 1, x: cache };
+			break;
+
+			case "fadeinleft":
+				var cache = this.x;
+				this.x = cache + 40;
+				animation = { alpha: 1, x: cache };
+			break;
+		}
+
+
+		this.animate(animation, duration, callback, easing)
 	};
 
 	Primitive.prototype.update = function() {
 		var newBuffer = [];
-		//Run any animations
+
+		//Run any animations in queue
 		//Needs to be fast.
 		for(var i = 0, length = this.animationBuffer.length; i < length; i++) {
 			var animation = this.animationBuffer[i];
@@ -465,25 +487,15 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 				animation.frame--;
 				newBuffer.push(animation);
 			} else {
-				if(animation.callback) animation.callback.call(this);
+				if(animation.callback && !animation.callback.called) animation.callback.call(this), animation.callback.called = true;
 			}
 		}
 
+		//Replace the buffer
 		this.animationBuffer = newBuffer;
 	};
 
-	/**
-	 * Primitive rendering. Aristochart translates and rotates instead of leaving that to the user
-	 * @return {null} 
-	 */
-	Primitive.prototype.render = function() {
-		ctx.save();
-		ctx.translate(this.x, this.y);
-		ctx.rotate(this.rotation);
-		obj.render.call(this);
-		ctx.restore();
-	};
-
+	Primitive.prototype.render = obj.render;
 	Primitive.prototype.isInside = obj.isInside;
 	Primitive.prototype.getBoundingBox = obj.getBoundingBox;
 
@@ -631,9 +643,34 @@ Aristochart.Registry.prototype = {
  * Awesome Easing functions courtesy of 
  * https://github.com/danro/jquery-easing/blob/master/jquery.easing.js
  *
+ * TERMS OF USE - EASING EQUATIONS
+ * 
+ * Open source under the BSD License. 
  * 
  * Copyright © 2001 Robert Penner
  * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
+ * 
+ * Redistributions of source code must retain the above copyright notice, this list of 
+ * conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list 
+ * of conditions and the following disclaimer in the documentation and/or other materials 
+ * provided with the distribution.
+ * 
+ * Neither the name of the author nor the names of contributors may be used to endorse 
+ * or promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+ *  GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED 
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  */
 Aristochart.Easing = {
@@ -771,7 +808,7 @@ Aristochart.Easing = {
 	},
 
 	easeInBounce: function (x, t, b, c, d) {
-		return c - jQuery.easing.easeOutBounce (x, d-t, 0, c, d) + b;
+		return c - Aristochart.Easing.easeOutBounce (x, d-t, 0, c, d) + b;
 	},
 
 	easeOutBounce: function (x, t, b, c, d) {
@@ -787,8 +824,8 @@ Aristochart.Easing = {
 	},
 
 	easeInOutBounce: function (x, t, b, c, d) {
-		if (t < d/2) return jQuery.easing.easeInBounce (x, t*2, 0, c, d) * .5 + b;
-		return jQuery.easing.easeOutBounce (x, t*2-d, 0, c, d) * .5 + c*.5 + b;
+		if (t < d/2) return Aristochart.Easing.easeInBounce (x, t*2, 0, c, d) * .5 + b;
+		return Aristochart.Easing.easeOutBounce (x, t*2-d, 0, c, d) * .5 + c*.5 + b;
 	}
 };
 
@@ -813,25 +850,25 @@ Aristochart.Themes.default = {
 	line: {
 		point: {
 			init: function() {
-				console.log("I'm born!");
+				this.side = 10;
 			},
 
 			render: function() {
-				this.ctx.fillStyle = "#000";
-				this.ctx.fillRect(0, 0, 10, 10);
+				this.ctx.fillStyle = "rgba(0, 0, 0, " + this.alpha + ")";
+				this.ctx.fillRect(this.x, this.y, this.side, this.side);
 			},
 
 			getBoundingBox: function() {
 				return {
-					x: 0,
-					x1: 10,
-					y: 0,
-					y1: 10
+					x: this.x,
+					x1: this.x + this.side,
+					y: this.y,
+					y1: this.y + this.side
 				}
 			},
 
 			isInside: function(x, y) {
-				if(x > this.x && x < (this.x + 10) && y > this.x && y < (this.y + 10)) return true;
+				if(x > this.x && x < (this.x + this.side) && y > this.x && y < (this.y + this.side)) return true;
 				else return false;
 			},
 
