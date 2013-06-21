@@ -42,8 +42,8 @@ var Aristochart = function(elem, options, theme) {
 
 	// Set them to the instance
 	this.options = options;
-	this.data = options.data;
 	this.type = options.type;
+	this.data = new Aristochart.Data(this.type, options.data);
 	this.theme = theme;
 
 	//Initilize some of the data with a "refresh"
@@ -56,7 +56,7 @@ var Aristochart = function(elem, options, theme) {
 		//Bind the events
 		var that = this;
 		this.canvas.addEventListener("click", function(event) {
-			that.registry.objectsUnder(event.offsetX, event.offsetY).forEach(function(primitive) {
+			that.registry.objectsUnder(event.offsetX * that.resolution, event.offsetY * that.resolution).forEach(function(primitive) {
 				if(primitive.events.click) primitive.events.click.call(primitive);
 			})
 		});
@@ -64,7 +64,7 @@ var Aristochart = function(elem, options, theme) {
 		//Handle mousemove over elements
 		var buffer = [];
 		this.canvas.addEventListener("mousemove", function(event) {
-			var current = that.registry.objectsUnder(event.offsetX, event.offsetY);
+			var current = that.registry.objectsUnder(event.offsetX * that.resolution, event.offsetY * that.resolution);
 
 			//Iterate over the current and call mouseover if not already
 			//else call mousemove and put it into a buffer
@@ -119,25 +119,6 @@ Aristochart.prototype.validateOptions = function() {
 };
 
 /**
- * Validates the inputted data
- */
-Aristochart.prototype.validateData = function() {
-	var data = this.data;
-	switch(this.type) {
-		case "line":
-			if(!data.x || !data.y) Aristochart.Error("Invalid line data. Please specify an X property and y property and optional y1, y2, yn etc. properties.");
-		break;
-
-		case "pie":
-			if(Object.key(data).length < 1) Aristochart.Error("Invalid pie data. Please provide some data in the form of sliceName : value.");
-		break;
-	}
-
-	//Sanitize the data
-	this.data = Aristochart.sanitize[this.type](this.data);
-};
-
-/**
  * Flatten the style object with it's local defaults
  * @param {Object} theme The theme object to parse
  * @return {Object} Parsed theme
@@ -169,7 +150,7 @@ Aristochart.prototype.compilePrimitives = function() {
 	Aristochart.supported.forEach(function(chart) {
 		var feature = that.options[chart];
 		for(var key in feature) {
-			feature[key] = Aristochart.Primitive(that.canvas, that.ctx, feature[key]);
+			feature[key] = Aristochart.Primitive(that.canvas, that.ctx, that.options.style[chart][key], feature[key]);
 		}
 	});
 };
@@ -188,6 +169,9 @@ Aristochart.prototype.refreshBounds = function() {
 		y: (padding.top + margin.top),
 		y1: height - (padding.bottom + margin.bottom)
 	};
+
+	this.box.width = this.box.x1 - this.box.x;
+	this.box.height = this.box.y1 - this.box.y;
 };
 
 /**
@@ -206,8 +190,7 @@ Aristochart.prototype.refresh = function() {
 	//Validate some specific options
 	this.validateOptions();
 
-	//Validate and sanitize the data
-	this.validateData();
+	this.data.refresh();
 
 	//Compile the primitive objects in the theme, render, isInside, etc. in Aristochart.Primitive
 	this.compilePrimitives();
@@ -215,15 +198,13 @@ Aristochart.prototype.refresh = function() {
 	//Refresh the bounding box
 	this.refreshBounds();
 
-	if(window.devicePixelRatio) {
-		this.canvas.style.height = this.options.height + "px";
-		this.canvas.style.width = this.options.width + "px";
-		this.canvas.height = this.options.height * window.devicePixelRatio;
-		this.canvas.width = this.options.width * window.devicePixelRatio;
-	} else {
-		this.canvas.height = this.options.height;
-		this.canvas.width = this.options.width;
-	}
+	//Set the resolution
+	this.resolution = window.devicePixelRatio || 1;
+
+	this.canvas.style.height = this.options.height + "px";
+	this.canvas.style.width = this.options.width + "px";
+	this.canvas.height = this.options.height * this.resolution;
+	this.canvas.width = this.options.width * this.resolution;
 };
 
 /**
@@ -244,6 +225,19 @@ Aristochart.prototype.render = function() {
 
 	//Render the registry of primitives
 	this.registry.render();
+};
+
+/**
+ * Returns the scaled point on a canvas.
+ * @param  {int} x X coord
+ * @param  {int} y Y coord
+ * @return {Object}   {x, y} scaled
+ */
+Aristochart.prototype.point = function(x, y) {
+	return {
+		x: (x + this.box.x) * this.resolution,
+		y: (y + this.box.y) * this.resolution
+	}
 };
 
 /**
@@ -291,13 +285,144 @@ Aristochart._deepMerge = function(options, defaults) {
 };
 
 /**
- * Aristochart's data handler. Where all the magic happen,
- * @param {String} context The Chart type
- * @param {*} data    The data
+ * Aristochart data constructor.
+ * @param {string} context The chart type
+ * @param {*} data    Data
  */
 Aristochart.Data = function(context, data) {
+	this.raw = data;
 	this.context = context;
-	this.data = data;
+
+	//All data initilzation and sanitization occurs in
+	//this.refresh. It's called in the Aristochart.refresh.
+};
+
+Aristochart.Data.prototype = {
+	/**
+	 * Validate inputted data
+	 * @return {null}
+	 */
+	validateData: function() {
+		var data = this.raw;
+		switch(this.context) {
+			case "line":
+				if(!data.x || !data.y) Aristochart.Error("Invalid line data. Please specify an X property and y property and optional y1, y2, yn etc. properties.");
+			break;
+
+			case "pie":
+				if(Object.key(data).length < 1) Aristochart.Error("Invalid pie data. Please provide some data in the form of sliceName : value.");
+			break;
+		}
+	},
+
+	/**
+	 * When the data is changed, variables needs to be update. This refresh updates those variables.
+	 * @return {null} 
+	 */
+	refresh: function() {
+		//Validate and sanitize the data
+		this.validateData();
+
+		//Sanitize the data
+		Aristochart.Data.sanitize[this.context].call(this);
+	},
+
+	/**
+	 * Returns the points in the form of line: [x, y]
+	 * @return {object} Array of lines and their points
+	 */
+	getPoints: function() {
+		var output = {};
+		for(var y in this.raw) {
+			if(y == "x") continue; //Skip x
+
+			output[y] = [];
+
+			var arr = this.raw[y], length = arr.length
+			for(var i = 0; i < length; i++) {
+				var point = {
+					x: (this.x.range/(length-1)) * i,
+					y: arr[i]
+				};
+
+				output[y].push(point);
+			}
+		}
+
+		return output;
+	},
+
+	/**
+	 * Get's the min, max of a set of lines
+	 * @param  {Object} lines Object of lines with array for values
+	 * @return {Object}       {min, max, range}
+	 */
+	getBounds: function() {
+		if(["line"].indexOf(this.context) == -1) Aristochart.Error("Aristochart.Data#getBounds only works on line charts.");
+
+		var max = -Infinity, min = Infinity,
+			lines = this.raw;
+		for(var line in lines) {
+			if(line == "x") continue;
+			var data = lines[line];
+
+			for(var i = 0, cache = data.length; i < cache; i++) {
+				var value = data[i];
+
+				if(value > max) max = value;
+				if(value < min) min = value;
+			}
+		}
+
+		return {
+			max: max,
+			min: min,
+			range: max - min
+		};
+	}
+};
+
+/**
+ * Sanitization of the data functions.
+ * @type {Object}
+ */
+Aristochart.Data.sanitize = {
+	/**
+	 * Line santization:
+	 *
+	 * Possible input:
+	 * 	{
+	 * 		x: int || [int] || [int, int] || [int, int, ..., int],
+	 * 		y: [int, ..., int] || { fn, start: stop },
+	 * 		y1: [int, ..., int],
+	 * 		y2: [int, ..., int],
+	 * 		       ...
+	 * 		yn: [int, ..., int]
+	 * 	}
+	 */
+	line: function() {
+		var data = this.raw, x;
+
+		if(typeof data.x == "number") x = {min: 0, max: data.x, range: data.x};
+		else if(data.x instanceof Array && data.x.length == 1) x = {min: 0, max: data.x[0], range: data.x[0]};
+		else if(data.x instanceof Array) x = {min: data.x[0], max: data.x[data.x.length - 1], range: data.x[data.x.length -1] - data.x[0]};
+		else Aristochart.Error("Bad data. Bad data supplied to the x property.");
+
+		// Make sure the rest are arrays and greater than 1 in length
+		for(var line in data) {
+			if(line == "x") continue;
+
+			var y = data[line];
+			if(!(y instanceof Array)) Aristochart.Error("Bad Data. Please make sure " + line + " is an array of data points");
+			else if(y.length < 2) Aristochart.Error("Bad data. Please make sure line " + line + "'s data has more than one data point.");
+		}
+
+		//set the x and y
+		this.x = x;
+		this.y = this.getBounds();
+
+		this.data = data;
+	}
 };
 
 /**
@@ -308,57 +433,25 @@ Aristochart.Chart = {
 	line: {
 		init: function() {
 			//Start by populating the registry
-			
-		},
+			var points = this.data.getPoints();
 
-		getPoints: function(data) {
-			var output = {};
-			for(var y in data) {
-				if(y == "x") continue; //Skip x
+			// for(var line in points) {
+			// 	for(var i = 0, cache = points[line].length; i < cache; i++) {
+			// 		var point = points[line][i],
+			// 			x = ((point.x - this.data.x.min)/this.data.x.range) * this.box.width,
+			// 			y = ((point.y - this.data.y.min)/this.data.y.range) * this.box.height,
+			// 			scale = this.point(x, y);
 
-				output[y] = [];
+			// 		console.log(scale);
 
-				var arr = data[y], length = arr.length
-				for(var i = 0; i < length; i++) {
-					var point = {
-						x: (data.x.range) * i,
-						y: arr[i]
-					};
+			// 		var primitive = new this.options.line.point({
+			// 			x: scale.x,
+			// 			y: scale.y
+			// 		});
 
-					output[y].push(point);
-				}
-			}
-
-			return output;
-		}
-	},
-
-	common: {
-		/**
-		 * Get's the min, max of a set of lines
-		 * @param  {Object} lines Object of lines with array for values
-		 * @return {Object}       {min, max, range}
-		 */
-		getBounds: function(lines) {
-			var max = -Infinity, min = Infinity;
-			console.log(lines);
-			for(var line in lines) {
-				if(line == "x") continue;
-				var data = lines[line];
-
-				for(var i = 0, cache = data.length; i < cache; i++) {
-					var value = data[i];
-
-					if(value > max) max = value;
-					if(value < min) min = value;
-				}
-			}
-
-			return {
-				max: max,
-				min: min,
-				range: max - min
-			};
+			// 		this.registry.add(primitive);
+			// 	}
+			// }
 		}
 	}
 };
@@ -375,49 +468,6 @@ Aristochart.Tools = {
 	background: function(canvas, ctx, fill) {
 		ctx.fillStyle = fill;
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
-	}
-};
-
-/**
- * Sanitization of the data functions.
- * @type {Object}
- */
-Aristochart.sanitize = {
-	/**
-	 * Line santization:
-	 *
-	 * Possible input:
-	 * 	{
-	 * 		x: int || [int] || [int, int] || [int, int, ..., int],
-	 * 		y: [int, ..., int] || { fn, start: stop },
-	 * 		y1: [int, ..., int],
-	 * 		y2: [int, ..., int],
-	 * 		       ...
-	 * 		yn: [int, ..., int]
-	 * 	}
-	 */
-	line: function(data) {
-		var x;
-
-		if(typeof data.x == "number") x = {min: 0, max: data.x, range: data.x};
-		else if(data.x instanceof Array && data.x.length == 1) x = {min: 0, max: data.x[0], range: data.x[0]};
-		else if(data.x instanceof Array) x = {min: data.x[0], max: data.x[data.x.length - 1], range: data.x[data.x.length -1] - data.x[0]};
-		else Aristochart.Error("Bad data. Bad data supplied to the x property.");
-
-		// Make sure the rest are arrays and greater than 1 in length
-		for(var line in data) {
-			if(line == "x") continue;
-
-			var y = data[line];
-			if(!(y instanceof Array)) Aristochart.Error("Bad Data. Please make sure " + line + " is an array of data points");
-			else if(y.length < 2) Aristochart.Error("Bad data. Please make sure line " + line + "'s data has more than one data point.");
-		}
-
-		//set the x
-		data.meta = {};
-		data.meta.x = x;
-		data.meta.y = Aristochart.Chart.common.getBounds(data);
-		return data;
 	}
 };
 
@@ -469,7 +519,7 @@ Aristochart.Engine.prototype.stop = function() {
  *     update
  *     render
  */
-Aristochart.Primitive = function(canvas, ctx, obj) {
+Aristochart.Primitive = function(canvas, ctx, style, obj) {
 	if(!obj.render) Aristochart.Error("Aristochart.Primitive: Forgot to supply a render function when creating a primitive.");
 	if(!obj.isInside && !obj.getBoundingBox) Aristochart.Error("Aristochart.Primitive: Forgot to supply isInside or getBoundingBox functions. Supply both preferably.");
 
@@ -481,14 +531,16 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 		this.index = 0;
 		this.visible = true;
 
-		//Positioning
-		this.x = 0;
-		this.y = 0;
+		this.style = style;
 
 		//Animation variables
 		this.alpha = 1;
 		this.rotation = 0;
 		this.scale = window.devicePixelRatio || 1;
+
+		//Define the primitive's dimensions
+		this.dimension("x", 0);
+		this.dimension("y", 0);
 
 		this.animationBuffer = [];
 
@@ -620,6 +672,29 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 	Primitive.prototype.render = obj.render;
 	Primitive.prototype.isInside = obj.isInside;
 	Primitive.prototype.getBoundingBox = obj.getBoundingBox;
+
+	/**
+	 * Defines getters and setters for dimensions so that the scale is automatically applied. I choose "dimension"
+	 * for lack of a better word. This applys to any integer that relates to rendering on the canvas. All dimensions
+	 * should be declared in the constructor.
+	 * 
+	 * @param  {string} name         Property name
+	 * @param  {int} initialValue Initial value of the dimensions
+	 * @return {null}              
+	 */
+	Primitive.prototype.dimension = function(name, initialValue) {
+		this["_" + name] = initialValue;
+
+		Object.defineProperty(this, name, {
+			get: function() {
+				return this["_" + name] * this.scale;
+			},
+
+			set: function(value) {
+				this["_" + name] = value;
+			}
+		})
+	};
 
 	return Primitive;
 };
@@ -1002,7 +1077,7 @@ Aristochart.Themes.default = {
 	line: {
 		point: {
 			init: function() {
-				this.side = 10;
+				this.dimension("side", 10);
 			},
 
 			render: function() {
@@ -1083,7 +1158,12 @@ Aristochart.Themes.default = {
 		line: {
 			tick: {},
 			axis: {},
-			//etc.
+
+			point: {
+				radius: 4,
+				stroke: "#f00",
+				fill: "#000"
+			},
 
 			line: {
 
