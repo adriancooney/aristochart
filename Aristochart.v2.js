@@ -527,11 +527,13 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 	 * Primitive Constructor.
 	 */
 	var Primitive = function(data) {
+		//Color and dimension stores
+		this.colors = {};
+		this.dimensions = {};
+
 		//Default
 		this.index = 0;
 		this.visible = true;
-
-		this.style = style;
 
 		//Animation variables
 		this.alpha = 1;
@@ -556,6 +558,9 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 
 		//Custom initilization
 		if(obj.init) obj.init.call(this);
+
+		//Merge the styles
+		if(style) Aristochart._deepMerge(style, this);
 	};
 
 	/**
@@ -683,15 +688,31 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 	 * @return {null}              
 	 */
 	Primitive.prototype.dimension = function(name, initialValue) {
-		this["_" + name] = initialValue;
+		this.dimensions[name] = initialValue;
 
 		Object.defineProperty(this, name, {
 			get: function() {
-				return this["_" + name] * this.scale;
+				return this.dimensions[name] * this.scale;
 			},
 
 			set: function(value) {
-				this["_" + name] = value;
+				this.dimensions[name] = value;
+			}
+		})
+	};
+
+	Primitive.prototype.color = function(name, initialValue) {
+		this.colors[name] = initialValue;
+
+		Object.defineProperty(this, name, {
+			get: function() {
+				var color = this.colors[name];
+				color.a = color.a + (this.alpha - 1); //Tone down the overall opacity
+				return color.toString();
+			},
+
+			set: function(value) {
+				this.colors[name] = new Aristochart.Color(value);
 			}
 		})
 	};
@@ -1078,6 +1099,7 @@ Aristochart.Themes.default = {
 		point: {
 			init: function() {
 				this.dimension("side", 10);
+				this.color("stroke");
 			},
 
 			render: function() {
