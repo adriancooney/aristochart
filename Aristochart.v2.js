@@ -56,7 +56,7 @@ var Aristochart = function(elem, options, theme) {
 		//Bind the events
 		var that = this;
 		this.canvas.addEventListener("click", function(event) {
-			that.registry.objectsUnder(event.offsetX * that.resolution, event.offsetY * that.resolution).forEach(function(primitive) {
+			that.registry.objectsUnder(event.offsetX, event.offsetY).forEach(function(primitive) {
 				if(primitive.events.click) primitive.events.click.call(primitive);
 			})
 		});
@@ -64,7 +64,7 @@ var Aristochart = function(elem, options, theme) {
 		//Handle mousemove over elements
 		var buffer = [];
 		this.canvas.addEventListener("mousemove", function(event) {
-			var current = that.registry.objectsUnder(event.offsetX * that.resolution, event.offsetY * that.resolution);
+			var current = that.registry.objectsUnder(event.offsetX, event.offsetY);
 
 			//Iterate over the current and call mouseover if not already
 			//else call mousemove and put it into a buffer
@@ -205,6 +205,9 @@ Aristochart.prototype.refresh = function() {
 	this.canvas.style.width = this.options.width + "px";
 	this.canvas.height = this.options.height * this.resolution;
 	this.canvas.width = this.options.width * this.resolution;
+
+	//scale the canva
+	this.ctx.scale(this.resolution, this.resolution);
 };
 
 /**
@@ -538,11 +541,7 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 		//Animation variables
 		this.alpha = 1;
 		this.rotation = 0;
-		this.scale = window.devicePixelRatio || 1;
-
-		//Define the primitive's dimensions
-		this.dimension("x", 0);
-		this.dimension("y", 0);
+		this.scale = 1;
 
 		this.animationBuffer = [];
 
@@ -572,6 +571,8 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 
 		var box = this.getBoundingBox();
 		this.ctx.save();
+		this.ctx.translate(this.x, this.y);
+		this.ctx.scale(this.scale, this.scale)
 		this.ctx.beginPath();
 		this.ctx.strokeStyle = "#f00";
 		this.ctx.lineWidth = 3;
@@ -649,7 +650,7 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 		}
 
 
-		this.animate(animation, duration, callback, easing)
+		this.animate(animation, duration, callback, easing);
 	};
 
 	Primitive.prototype.update = function() {
@@ -674,48 +675,18 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 		this.animationBuffer = newBuffer;
 	};
 
-	Primitive.prototype.render = obj.render;
+	Primitive.prototype.render = function() {
+		this.ctx.save();
+		this.ctx.translate(this.x, this.y);
+		this.ctx.rotate(this.rotation);
+		this.ctx.scale(this.scale, this.scale);
+		this.ctx.globalAlpha = this.alpha;
+		obj.render.call(this);
+		this.ctx.restore();
+	};
+
 	Primitive.prototype.isInside = obj.isInside;
 	Primitive.prototype.getBoundingBox = obj.getBoundingBox;
-
-	/**
-	 * Defines getters and setters for dimensions so that the scale is automatically applied. I choose "dimension"
-	 * for lack of a better word. This applys to any integer that relates to rendering on the canvas. All dimensions
-	 * should be declared in the constructor.
-	 * 
-	 * @param  {string} name         Property name
-	 * @param  {int} initialValue Initial value of the dimensions
-	 * @return {null}              
-	 */
-	Primitive.prototype.dimension = function(name, initialValue) {
-		this.dimensions[name] = initialValue;
-
-		Object.defineProperty(this, name, {
-			get: function() {
-				return this.dimensions[name] * this.scale;
-			},
-
-			set: function(value) {
-				this.dimensions[name] = value;
-			}
-		})
-	};
-
-	Primitive.prototype.color = function(name, initialValue) {
-		this.colors[name] = initialValue;
-
-		Object.defineProperty(this, name, {
-			get: function() {
-				var color = this.colors[name];
-				color.a = color.a + (this.alpha - 1); //Tone down the overall opacity
-				return color.toString();
-			},
-
-			set: function(value) {
-				this.colors[name] = new Aristochart.Color(value);
-			}
-		})
-	};
 
 	return Primitive;
 };
@@ -784,8 +755,9 @@ Aristochart.Color.prototype.parse = function(color) {
  * Convert convert color to rgba
  * @return {String} rgba(r, g, b, a)
  */
-Aristochart.Color.prototype.toString = function() {
-	return "rgba(" + [this.r, this.g, this.b, this.a].join(", ") + ")";
+Aristochart.Color.prototype.toString = function(override) {
+
+	return "rgba(" + this.r + ", " + this.g + ", " + this.b + ", " + this.a + ")";
 };
 
 /**
@@ -806,15 +778,13 @@ Aristochart.Registry.prototype = {
 	 */
 	objectsUnder: function(x, y) {
 		var objectsUnder = [];
-		for(var i = 0, cache = this.registry.length; i < cache; i++) {
-		}
 
 		for(var i = 0, cache = this.registry.length; i < cache; i++) {
 			var primitives = this.registry[i];
 
 			for(var n = 0, bcache = primitives.length; n < bcache; n++) {
 				var primitive = primitives[n];
-				if(primitive.isInside(x, y)) objectsUnder.push(primitive);
+				if(primitive.isInside(x - primitive.x, y - primitive.y)) objectsUnder.push(primitive);
 			}
 		}
 
@@ -1098,21 +1068,21 @@ Aristochart.Themes.default = {
 	line: {
 		point: {
 			init: function() {
-				this.dimension("side", 10);
-				this.color("stroke");
 			},
 
 			render: function() {
-				this.ctx.fillStyle = this.color || "rgba(0, 0, 0, " + this.alpha + ")";
-				this.ctx.fillRect(this.x, this.y, this.side, this.side);
+				this.ctx.fillStyle = this.fill;
+				var half = this.side/2;
+				this.ctx.fillRect(-half, -half, this.side, this.side);
 			},
 
 			getBoundingBox: function() {
+				var half = this.side/2;
 				return {
-					x: this.x,
-					x1: this.x + this.side,
-					y: this.y,
-					y1: this.y + this.side
+					x: -half,
+					x1: half,
+					y: -half,
+					y1: half
 				}
 			},
 
@@ -1130,8 +1100,8 @@ Aristochart.Themes.default = {
 				mouseover: function() {
 					console.log("MOUSEOVER!");
 					this.mouseover = true;
-					this.x = this.x + 10;
-					this.y = this.y + 10;
+					this.x = this._x + 10;
+					this.y = this._y + 10;
 				},
 
 				mousemove: function() {
@@ -1182,8 +1152,9 @@ Aristochart.Themes.default = {
 			axis: {},
 
 			point: {
-				radius: 4,
+				side: 10,
 				stroke: "#f00",
+				width: 4,
 				fill: "#000"
 			},
 
