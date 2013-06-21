@@ -215,9 +215,15 @@ Aristochart.prototype.refresh = function() {
 	//Refresh the bounding box
 	this.refreshBounds();
 
-	//Set the size of the canvas
-	this.canvas.height = this.options.height;
-	this.canvas.width = this.options.width;
+	if(window.devicePixelRatio) {
+		this.canvas.style.height = this.options.height + "px";
+		this.canvas.style.width = this.options.width + "px";
+		this.canvas.height = this.options.height * window.devicePixelRatio;
+		this.canvas.width = this.options.width * window.devicePixelRatio;
+	} else {
+		this.canvas.height = this.options.height;
+		this.canvas.width = this.options.width;
+	}
 };
 
 /**
@@ -285,6 +291,16 @@ Aristochart._deepMerge = function(options, defaults) {
 };
 
 /**
+ * Aristochart's data handler. Where all the magic happen,
+ * @param {String} context The Chart type
+ * @param {*} data    The data
+ */
+Aristochart.Data = function(context, data) {
+	this.context = context;
+	this.data = data;
+};
+
+/**
  * Chart initilizers
  * @type {Object}
  */
@@ -293,11 +309,57 @@ Aristochart.Chart = {
 		init: function() {
 			//Start by populating the registry
 			
+		},
+
+		getPoints: function(data) {
+			var output = {};
+			for(var y in data) {
+				if(y == "x") continue; //Skip x
+
+				output[y] = [];
+
+				var arr = data[y], length = arr.length
+				for(var i = 0; i < length; i++) {
+					var point = {
+						x: (data.x.range) * i,
+						y: arr[i]
+					};
+
+					output[y].push(point);
+				}
+			}
+
+			return output;
 		}
 	},
 
 	common: {
-		getPoints: function() {}
+		/**
+		 * Get's the min, max of a set of lines
+		 * @param  {Object} lines Object of lines with array for values
+		 * @return {Object}       {min, max, range}
+		 */
+		getBounds: function(lines) {
+			var max = -Infinity, min = Infinity;
+			console.log(lines);
+			for(var line in lines) {
+				if(line == "x") continue;
+				var data = lines[line];
+
+				for(var i = 0, cache = data.length; i < cache; i++) {
+					var value = data[i];
+
+					if(value > max) max = value;
+					if(value < min) min = value;
+				}
+			}
+
+			return {
+				max: max,
+				min: min,
+				range: max - min
+			};
+		}
 	}
 };
 
@@ -337,9 +399,9 @@ Aristochart.sanitize = {
 	line: function(data) {
 		var x;
 
-		if(typeof data.x == "number") x = {lower: 0, upper: data.x, range: data.x};
-		else if(data.x instanceof Array && data.x.length == 1) x = {lower: 0, upper: data.x[0], range: data.x[0]};
-		else if(data.x instanceof Array) x = {lower: data.x[0], upper: data.x[data.x.length - 1], range: data.x[data.x.length -1] - data.x[0]};
+		if(typeof data.x == "number") x = {min: 0, max: data.x, range: data.x};
+		else if(data.x instanceof Array && data.x.length == 1) x = {min: 0, max: data.x[0], range: data.x[0]};
+		else if(data.x instanceof Array) x = {min: data.x[0], max: data.x[data.x.length - 1], range: data.x[data.x.length -1] - data.x[0]};
 		else Aristochart.Error("Bad data. Bad data supplied to the x property.");
 
 		// Make sure the rest are arrays and greater than 1 in length
@@ -352,7 +414,9 @@ Aristochart.sanitize = {
 		}
 
 		//set the x
-		data.x = x;
+		data.meta = {};
+		data.meta.x = x;
+		data.meta.y = Aristochart.Chart.common.getBounds(data);
 		return data;
 	}
 };
@@ -413,13 +477,19 @@ Aristochart.Primitive = function(canvas, ctx, obj) {
 	 * Primitive Constructor.
 	 */
 	var Primitive = function(data) {
+		//Default
 		this.index = 0;
 		this.visible = true;
+
+		//Positioning
 		this.x = 0;
 		this.y = 0;
+
+		//Animation variables
 		this.alpha = 1;
 		this.rotation = 0;
-		this.scale = 1;
+		this.scale = window.devicePixelRatio || 1;
+
 		this.animationBuffer = [];
 
 		//Set the canvas and ctx
