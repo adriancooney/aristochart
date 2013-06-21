@@ -38,7 +38,7 @@ var Aristochart = function(elem, options, theme) {
 	this.engine = new Aristochart.Engine(this, this.update, this.render);
 
 	//Add a debug border
-	if(Aristochart.DEBUG) this.canvas.style.border = "3px solid red";
+	if(Aristochart.DEBUG) this.canvas.style.outline = "3px solid red";
 
 	// Set them to the instance
 	this.options = options;
@@ -61,32 +61,19 @@ var Aristochart = function(elem, options, theme) {
 			})
 		});
 
+		//Add the impossible initial mouse coordinates for update throttling
+		that._mouseX = -1;
+		that._mouseY = -1;
+		that.mouseX = -1;
+		that.mouseY = -1;
+
+		//Create the mouse buffer
+		this.mouseBuffer = [];
+
 		//Handle mousemove over elements
-		var buffer = [];
 		this.canvas.addEventListener("mousemove", function(event) {
-			var current = that.registry.objectsUnder(event.offsetX, event.offsetY);
-
-			//Iterate over the current and call mouseover if not already
-			//else call mousemove and put it into a buffer
-			current.forEach(function(primitive) {
-				if(!primitive._mouseover) {
-					if(primitive.events.mouseover) primitive.events.mouseover.call(primitive);
-					primitive._mouseover = true;
-					buffer.push(primitive);
-				} else {
-					if(primitive.events.mousemove) primitive.events.mousemove.call(primitive);
-				}
-			});
-
-			//Check the buffer to see if the elements are still being hovered
-			//if not, remove it from the buffer and call mouseout
-			buffer.forEach(function(primitive, i) {
-				if(current.indexOf(primitive) == -1) {
-					if(primitive.events.mouseout) primitive.events.mouseout.call(primitive);
-					primitive._mouseover = false;
-					buffer.splice(i, 1);
-				}
-			});
+			that.mouseX = event.offsetX;
+			that.mouseY = event.offsetY;
 		});
 	}
 
@@ -215,6 +202,42 @@ Aristochart.prototype.refresh = function() {
  * @return {null}
  */
 Aristochart.prototype.update = function() {
+	//Throttling on the checking. ONly check if the mouse has moved
+	if(this.mouseX !== this._mouseX || this.mouseY !== this._mouseY) {
+		console.count("Checking");
+
+		//Update the mouse
+		var current = this.registry.objectsUnder(this.mouseX, this.mouseY);
+
+		//Iterate over the current and call mouseover if not already
+		//else call mousemove and put it into a buffer
+		for(var i = 0, cache = current.length; i < cache; i++) {
+			var primitive = current[i];
+			if(!primitive._mouseover) {
+				if(primitive.events.mouseover) primitive.events.mouseover.call(primitive);
+				primitive._mouseover = true;
+				this.mouseBuffer.push(primitive);
+			} else {
+				if(primitive.events.mousemove) primitive.events.mousemove.call(primitive);
+			}
+		}
+
+		//Check the buffer to see if the elements are still being hovered
+		//if not, remove it from the buffer and call mouseout
+		for(var i = 0, cache = this.mouseBuffer.length; i < cache; i++) {
+			var primitive = this.mouseBuffer[i];
+			if(current.indexOf(primitive) == -1) {
+				if(primitive.events.mouseout) primitive.events.mouseout.call(primitive);
+				primitive._mouseover = false;
+				this.mouseBuffer.splice(i, 1);
+			}
+		}
+
+		//And replace the coords
+		this._mouseX = this.mouseX;
+		this._mouseY = this.mouseY;
+	}
+
 	this.registry.update();
 };
 
@@ -681,7 +704,7 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 		this.ctx.rotate(this.rotation);
 		this.ctx.scale(this.scale, this.scale);
 		this.ctx.globalAlpha = this.alpha;
-		obj.render.call(this);
+		obj.render.call(this, this.ctx);
 		this.ctx.restore();
 	};
 
@@ -1056,7 +1079,7 @@ Aristochart.Themes = {};
  */
 Aristochart.Themes.default = {
 	static: false,
-	background: "#fff",
+	background: "#eee",
 
 	width: 400,
 	height: 230,
@@ -1070,10 +1093,14 @@ Aristochart.Themes.default = {
 			init: function() {
 			},
 
-			render: function() {
-				this.ctx.fillStyle = this.fill;
+			render: function(ctx) {
 				var half = this.side/2;
-				this.ctx.fillRect(-half, -half, this.side, this.side);
+				ctx.rect(-half, -half, this.side, this.side);
+				ctx.strokeStyle = this.stroke;
+				ctx.lineWidth = this.strokeWidth;
+				ctx.stroke();
+				ctx.fillStyle = this.fill;
+				ctx.fill();
 			},
 
 			getBoundingBox: function() {
@@ -1087,7 +1114,8 @@ Aristochart.Themes.default = {
 			},
 
 			isInside: function(x, y) {
-				if(x > this.x && x < (this.x + this.side) && y > this.x && y < (this.y + this.side)) return true;
+				var half = this.side/2;
+				if(x > -half && x < half && y > -half && y < half) return true;
 				else return false;
 			},
 
@@ -1100,8 +1128,7 @@ Aristochart.Themes.default = {
 				mouseover: function() {
 					console.log("MOUSEOVER!");
 					this.mouseover = true;
-					this.x = this._x + 10;
-					this.y = this._y + 10;
+					this.animate({x: this.x + 30, y: this.y + 30 }, 40);
 				},
 
 				mousemove: function() {
@@ -1153,8 +1180,8 @@ Aristochart.Themes.default = {
 
 			point: {
 				side: 10,
-				stroke: "#f00",
-				width: 4,
+				stroke: "#ff0",
+				strokeWidth: 4,
 				fill: "#000"
 			},
 
@@ -1185,6 +1212,10 @@ Aristochart.Themes.default = {
 			}
 		}
 	}
+};
+
+Aristochart.Primitives = {
+	rect: {}
 };
 
 /**
