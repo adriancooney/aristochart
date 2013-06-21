@@ -28,6 +28,15 @@ var Aristochart = function(elem, options, theme) {
 		this.ctx = elem.getContext("2d");
 	}
 
+	//Append the canvas
+	if(this.wrapper) this.wrapper.appendChild(this.canvas);
+
+	//Create it's own registry
+	this.registry = new Aristochart.Registry(this);
+
+	//Create Aristochart's render engine
+	this.engine = new Aristochart.Engine(this, this.update, this.render);
+
 	//Add a debug border
 	if(Aristochart.DEBUG) this.canvas.style.border = "3px solid red";
 
@@ -37,31 +46,8 @@ var Aristochart = function(elem, options, theme) {
 	this.type = options.type;
 	this.theme = theme;
 
-	//Collapse the styles to defaults
-	Aristochart.log("Merging the theme with the defaults.");
-	this.theme = Aristochart._deepMerge(this.theme, Aristochart.Themes.default);
-	Aristochart.log("Merging the options with the theme.");
-	this.options = Aristochart._deepMerge(this.options, this.theme);
-	Aristochart.log("Flattening out style.");
-	this.options = this.flattenStyle(this.options);
-
-	//Append the canvas
-	if(this.wrapper) this.wrapper.appendChild(this.canvas);
-
-	//Validate some specific options
-	this.validateOptions();
-
-	//Validate and sanitize the data
-	this.validateData();
-
-	//Compile the primitive objects in the theme, render, isInside, etc. in Aristochart.Primitive
-	this.compilePrimitives();
-
-	//Create it's own registry
-	this.registry = new Aristochart.Registry(this);
-
-	//Create Aristochart's render engine
-	this.engine = new Aristochart.Engine(this, this.update, this.render);
+	//Initilize some of the data with a "refresh"
+	this.refresh();
 
 	//Check to see if the graph is not static, start interactivity
 	if(!this.options.static) {
@@ -103,6 +89,9 @@ var Aristochart = function(elem, options, theme) {
 			});
 		});
 	}
+
+	//Initilize the chart
+	Aristochart.Chart[this.options.type].init.call(this);
 };
 
 /**
@@ -186,8 +175,54 @@ Aristochart.prototype.compilePrimitives = function() {
 };
 
 /**
+ * Refresh's the chart's bounds
+ * @return {null} 
+ */
+Aristochart.prototype.refreshBounds = function() {
+	var padding = this.options.padding, margin = this.options.margin,
+		width = this.options.width, height = this.options.height;
+
+	this.box = {
+		x: (padding.left + margin.left),
+		x1: width - (padding.right + margin.right),
+		y: (padding.top + margin.top),
+		y1: height - (padding.bottom + margin.bottom)
+	};
+};
+
+/**
+ * Refresh the Aritochart instance. Should be called if any options are changed.
+ * @return {null}
+ */
+Aristochart.prototype.refresh = function() {
+	//Collapse the styles to defaults
+	Aristochart.log("Merging the theme with the defaults.");
+	this.theme = Aristochart._deepMerge(this.theme, Aristochart.Themes.default);
+	Aristochart.log("Merging the options with the theme.");
+	this.options = Aristochart._deepMerge(this.options, this.theme);
+	Aristochart.log("Flattening out style.");
+	this.options = this.flattenStyle(this.options);
+
+	//Validate some specific options
+	this.validateOptions();
+
+	//Validate and sanitize the data
+	this.validateData();
+
+	//Compile the primitive objects in the theme, render, isInside, etc. in Aristochart.Primitive
+	this.compilePrimitives();
+
+	//Refresh the bounding box
+	this.refreshBounds();
+
+	//Set the size of the canvas
+	this.canvas.height = this.options.height;
+	this.canvas.width = this.options.width;
+};
+
+/**
  * Aristochart's main update
- * @return {[type]} [description]
+ * @return {null}
  */
 Aristochart.prototype.update = function() {
 	this.registry.update();
@@ -247,6 +282,23 @@ Aristochart._deepMerge = function(options, defaults) {
 
 		return defaults;
 	})(options, defaults)
+};
+
+/**
+ * Chart initilizers
+ * @type {Object}
+ */
+Aristochart.Chart = {
+	line: {
+		init: function() {
+			//Start by populating the registry
+			
+		}
+	},
+
+	common: {
+		getPoints: function() {}
+	}
 };
 
 /**
@@ -587,24 +639,30 @@ Aristochart.Registry.prototype = {
 	 * @return {array}   Array of objects if any
 	 */
 	objectsUnder: function(x, y) {
-		var primitives = [];
+		var objectsUnder = [];
 		for(var i = 0, cache = this.registry.length; i < cache; i++) {
-			if(this.registry[i].isInside(x, y)) primitives.push(this.registry[i]);
 		}
 
-		return primitives;
+		for(var i = 0, cache = this.registry.length; i < cache; i++) {
+			var primitives = this.registry[i];
+
+			for(var n = 0, bcache = primitives.length; n < bcache; n++) {
+				var primitive = primitives[n];
+				if(primitive.isInside(x, y)) objectsUnder.push(primitive);
+			}
+		}
+
+		return objectsUnder;
 	},
 
 	/**
 	 * add -- Adds an primitive to the registry
-	 * @param {Object} obj The primitive to add
+	 * @param {Object} primitive The primitive to add
 	 * @return {null}     
 	 */
-	add: function(obj) {
-		if(obj) {
-			if(obj instanceof Array) this.registry.concat(obj);
-			else this.registry.push(obj);
-		}
+	add: function(primitive) {
+		if(!this.registry[primitive.index]) this.registry[primitive.index] = [];
+		this.registry[primitive.index].push(primitive);
 	},
 
 	/**
@@ -613,7 +671,7 @@ Aristochart.Registry.prototype = {
 	 * @return {null}     
 	 */
 	remove: function(obj) {
-		this.registry.splice(this.registry.indexOf(obj), 1);
+		//this.registry.splice(this.registry.indexOf(obj), 1);
 	},
 
 	/**
@@ -622,7 +680,21 @@ Aristochart.Registry.prototype = {
 	 */
 	update: function() {
 		for(var i = 0, cache = this.registry.length; i < cache; i++) {
-			this.registry[i].update();
+			var primitives = this.registry[i];
+
+			var buffer = [];
+			for(var n = 0, bcache = primitives.length; n < bcache; n++) {
+				var primitive = primitives[n];
+
+				//Check to see if index has changed and move it to another if it has
+				if(primitive.index !== i) this.registry[primitive.index].push(primitive);
+				else buffer.push(primitive);
+
+				//Update
+				primitive.update();
+			}
+
+			this.registry[i] = buffer;
 		}
 	},
 
@@ -632,9 +704,16 @@ Aristochart.Registry.prototype = {
 	 */
 	render: function() {
 		for(var i = 0, cache = this.registry.length; i < cache; i++) {
-			var primitive = this.registry[i];
-			if(Aristochart.DEBUG) primitive.drawBoundingBox();
-			primitive.render();
+			var primitives = this.registry[i];
+
+			for(var n = 0, bcache = primitives.length; n < bcache; n++) {
+				var primitive = primitives[n];
+
+				//Debug mode to draw red boxes around primitives
+				if(Aristochart.DEBUG) primitive.drawBoundingBox();
+
+				primitive.render();
+			}
 		}
 	}
 };
@@ -843,6 +922,9 @@ Aristochart.Themes.default = {
 	static: false,
 	background: "#fff",
 
+	width: 400,
+	height: 230,
+
 	//Dimensions
 	padding: 10,
 	margin: 10,
@@ -854,7 +936,7 @@ Aristochart.Themes.default = {
 			},
 
 			render: function() {
-				this.ctx.fillStyle = "rgba(0, 0, 0, " + this.alpha + ")";
+				this.ctx.fillStyle = this.color || "rgba(0, 0, 0, " + this.alpha + ")";
 				this.ctx.fillRect(this.x, this.y, this.side, this.side);
 			},
 
