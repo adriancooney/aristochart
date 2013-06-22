@@ -204,7 +204,6 @@ Aristochart.prototype.refresh = function() {
 Aristochart.prototype.update = function() {
 	//Throttling on the checking. ONly check if the mouse has moved
 	if(this.mouseX !== this._mouseX || this.mouseY !== this._mouseY) {
-		console.count("Checking");
 
 		//Update the mouse
 		var current = this.registry.objectsUnder(this.mouseX, this.mouseY);
@@ -593,9 +592,6 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 		if(!this.getBoundingBox) Aristochart.Error("Primitive#drawBoundingBox: getBoundingBox not defined. Please define it if you want to draw the bounding box.");
 
 		var box = this.getBoundingBox();
-		this.ctx.save();
-		this.ctx.translate(this.x, this.y);
-		this.ctx.scale(this.scale, this.scale)
 		this.ctx.beginPath();
 		this.ctx.strokeStyle = "#f00";
 		this.ctx.lineWidth = 3;
@@ -605,7 +601,6 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 		this.ctx.lineTo(box.x, box.y1);
 		this.ctx.closePath();
 		this.ctx.stroke();
-		this.ctx.restore();
 	};
 
 	/**
@@ -617,7 +612,8 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 	 * @return {null}
 	 */
 	Primitive.prototype.animate = function(properties, frames, callback, easing) {
-		if(typeof callback == "string") easing = callback;
+		if(typeof callback == "string") easing = new String(callback;
+		if(easing && !Aristochart.Easing[easing]) Aristochart.Error("Easing function '" + easing + "' does not exist. See Aristochart.Easing for a list of supported easing functions.");
 
 		for(var prop in properties) {
 			if(this[prop] == undefined) { Aristochart.Error("Primitive#Animate: Property '" + prop + "' does not exist."); continue; }
@@ -677,29 +673,37 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 	};
 
 	Primitive.prototype.update = function() {
-		var newBuffer = [];
+		var animationBuffer = this.animationBuffer;
 
-		//Run any animations in queue
-		//Needs to be fast.
-		for(var i = 0, length = this.animationBuffer.length; i < length; i++) {
-			var animation = this.animationBuffer[i];
+		if(this.animationBuffer[0]) {
+			var newBuffer = [];
 
-			if(animation.frame) {
-				var value = animation.easing(undefined, (animation.length - animation.frame) + 1, 0, animation.range, animation.length);
-				animation.update.call(this, animation.length - animation.frame, animation.property, animation.initialValue + value);
-				animation.frame--;
-				newBuffer.push(animation);
-			} else {
-				if(animation.callback && !animation.callback.called) animation.callback.call(this), animation.callback.called = true;
+			//Run any animations in queue
+			//Needs to be fast.
+			for(var i = 0, length = animationBuffer.length; i < length; i++) {
+				var animation = animationBuffer[i];
+
+				if(animation.frame) {
+					var value = animation.easing(undefined, (animation.length - animation.frame) + 1, 0, animation.range, animation.length);
+					animation.update.call(this, animation.length - animation.frame, animation.property, animation.initialValue + value);
+					animation.frame--;
+					newBuffer.push(animation);
+				} else {
+					if(animation.callback && !animation.callback.called) animation.callback.call(this), animation.callback.called = true;
+				}
 			}
-		}
 
-		//Replace the buffer
-		this.animationBuffer = newBuffer;
+			//Replace the buffer
+			this.animationBuffer = newBuffer;
+		}
 	};
 
 	Primitive.prototype.render = function() {
 		this.ctx.save();
+
+		//Render a bounding box if necessary
+		// if(Aristochart.DEBUG) this.drawBoundingBox();
+
 		this.ctx.translate(this.x, this.y);
 		this.ctx.rotate(this.rotation);
 		this.ctx.scale(this.scale, this.scale);
@@ -720,6 +724,7 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
  */
 Aristochart.Registry = function(context) {
 	this.registry = [];
+	this.buffer = []; 
 	this.context = context;
 };
 
@@ -734,12 +739,8 @@ Aristochart.Registry.prototype = {
 		var objectsUnder = [];
 
 		for(var i = 0, cache = this.registry.length; i < cache; i++) {
-			var primitives = this.registry[i];
-
-			for(var n = 0, bcache = primitives.length; n < bcache; n++) {
-				var primitive = primitives[n];
-				if(primitive.isInside(x - primitive.x, y - primitive.y)) objectsUnder.push(primitive);
-			}
+			var primitive = this.registry[i];
+			if(primitive.isInside(x - primitive.x, y - primitive.y)) objectsUnder.push(primitive);
 		}
 
 		return objectsUnder;
@@ -751,8 +752,8 @@ Aristochart.Registry.prototype = {
 	 * @return {null}     
 	 */
 	add: function(primitive) {
-		if(!this.registry[primitive.index]) this.registry[primitive.index] = [];
-		this.registry[primitive.index].push(primitive);
+		if(Array.isArray(primitive)) this.registry.concat(primitive);
+		else this.registry.push(primitive);
 	},
 
 	/**
@@ -761,7 +762,7 @@ Aristochart.Registry.prototype = {
 	 * @return {null}     
 	 */
 	remove: function(obj) {
-		//this.registry.splice(this.registry.indexOf(obj), 1);
+		this.registry.splice(this.registry.indexOf(obj), 1);
 	},
 
 	/**
@@ -769,23 +770,9 @@ Aristochart.Registry.prototype = {
 	 * @return {null} 
 	 */
 	update: function() {
-		for(var i = 0, cache = this.registry.length; i < cache; i++) {
-			var primitives = this.registry[i];
-
-			var buffer = [];
-			for(var n = 0, bcache = primitives.length; n < bcache; n++) {
-				var primitive = primitives[n];
-
-				//Check to see if index has changed and move it to another if it has
-				if(primitive.index !== i) this.registry[primitive.index].push(primitive);
-				else buffer.push(primitive);
-
-				//Update
-				primitive.update();
-			}
-
-			this.registry[i] = buffer;
-		}
+		for (var i = this.registry.length - 1; i >= 0; i--) {
+			this.registry[i].update();
+		};
 	},
 
 	/**
@@ -793,18 +780,9 @@ Aristochart.Registry.prototype = {
 	 * @return {null} 
 	 */
 	render: function() {
-		for(var i = 0, cache = this.registry.length; i < cache; i++) {
-			var primitives = this.registry[i];
-
-			for(var n = 0, bcache = primitives.length; n < bcache; n++) {
-				var primitive = primitives[n];
-
-				//Debug mode to draw red boxes around primitives
-				if(Aristochart.DEBUG) primitive.drawBoundingBox();
-
-				primitive.render();
-			}
-		}
+		for (var i = this.registry.length - 1; i >= 0; i--) {
+			this.registry[i].render();
+		};
 	}
 };
 
@@ -1026,7 +1004,9 @@ Aristochart.Themes.default = {
 
 			render: function(ctx) {
 				var half = this.side/2;
+				ctx.beginPath();
 				ctx.rect(-half, -half, this.side, this.side);
+				ctx.closePath();
 				ctx.strokeStyle = this.stroke;
 				ctx.lineWidth = this.strokeWidth;
 				ctx.stroke();
