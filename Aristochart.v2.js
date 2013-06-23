@@ -11,22 +11,14 @@
  * 	
  */
 var Aristochart = function(elem, options, theme) {
-	if(!elem) Aristochart.Error("Please provide some options to the Aristochart constructor.");
-	if(!elem.nodeName) options = elem, elem = undefined;
-	if(!theme) theme = Aristochart.Themes.default;
+	if(!elem) Aristochart.Error("Please a container for the chart.");
 	if(!options.data) Aristochart.Error("Please provide some data to plot.");
 	if(!options.type) Aristochart.Error("Please specify the type of chart you want rendered.");	
+	if(!theme) theme = Aristochart.Themes.default;
 	if(Aristochart.supported.indexOf(options.type) == -1) Aristochart.Error("Chart type '" + options.type + "' not supported.");
 
-	//Create the canvas
-	if(!elem || elem.nodeName.toLowerCase() !== "canvas") {
-		this.wrapper = elem;
-		this.canvas = document.createElement("canvas");
-		this.ctx = this.canvas.getContext("2d");
-	} else {
-		this.canvas = elem;
-		this.ctx = elem.getContext("2d");
-	}
+	//Set the container
+	this.container = elem;
 
 	//Append the canvas
 	if(this.wrapper) this.wrapper.appendChild(this.canvas);
@@ -37,8 +29,25 @@ var Aristochart = function(elem, options, theme) {
 	//Create Aristochart's render engine
 	this.engine = new Aristochart.Engine(this, this.update, this.render);
 
+	//Create the layer store. I don't like the fact that these functions are here
+	//TODO: Refactor this area
+	this.layers = [];
+
+	var that = this;
+	this.layers.width = function(val) {
+		that.layers.forEach(function(layer) {
+			layer.width(val);
+		});
+	};
+
+	this.layers.height = function(val) {
+		that.layers.forEach(function(layer) {
+			layer.height(val);
+		})
+	};
+
 	//Add a debug border
-	if(Aristochart.DEBUG) this.canvas.style.outline = "3px solid red";
+	if(Aristochart.DEBUG) this.container.style.outline = "3px solid red";
 
 	// Set them to the instance
 	this.options = options;
@@ -54,8 +63,7 @@ var Aristochart = function(elem, options, theme) {
 		this.engine.start();
 
 		//Bind the events
-		var that = this;
-		this.canvas.addEventListener("click", function(event) {
+		this.container.addEventListener("click", function(event) {
 			that.registry.objectsUnder(event.offsetX, event.offsetY).forEach(function(primitive) {
 				if(primitive.events.click) primitive.events.click.call(primitive);
 			})
@@ -71,7 +79,7 @@ var Aristochart = function(elem, options, theme) {
 		this.mouseBuffer = [];
 
 		//Handle mousemove over elements
-		this.canvas.addEventListener("mousemove", function(event) {
+		this.container.addEventListener("mousemove", function(event) {
 			that.mouseX = event.offsetX;
 			that.mouseY = event.offsetY;
 		});
@@ -86,6 +94,32 @@ var Aristochart = function(elem, options, theme) {
  */
 Aristochart.DEBUG = true;
 Aristochart.supported = ["pie", "line"];
+
+/**
+ * Creates a new layer and propagates all the primitives related to the chart into a callback instance
+ * @param  {Function} callback Callback with any further setup
+ * @return {null}            
+ */
+Aristochart.prototype.layer = function(callback) {
+	var layer = new Aristochart.Layer(this.container, this.options.width, this.options.height),
+		primitives = this.options[this.type];
+
+	//Extend the prototype of the callback
+	for(var primitive in primitives) {
+		callback.prototype[primitive] = function(data) {
+			if(!data) data = {};
+			data.ctx = layer.ctx;
+			data.canvas = layer.canvas;
+			return new primitives[primitive](data);
+		};
+
+		//The registry
+		callback.prototype.registry = this.registry;
+	};
+
+	//Create a new callback instance
+	new callback;
+};
 
 /**
  * Validates specific options such as margin or padding
@@ -137,7 +171,7 @@ Aristochart.prototype.compilePrimitives = function() {
 	Aristochart.supported.forEach(function(chart) {
 		var feature = that.options[chart];
 		for(var key in feature) {
-			feature[key] = Aristochart.Primitive(that.canvas, that.ctx, that.options.style[chart][key], feature[key]);
+			feature[key] = Aristochart.Primitive(that.options.style[chart][key], feature[key]);
 		}
 	});
 };
@@ -185,16 +219,11 @@ Aristochart.prototype.refresh = function() {
 	//Refresh the bounding box
 	this.refreshBounds();
 
-	//Set the resolution
-	this.resolution = window.devicePixelRatio || 1;
+	this.container.style.height = this.options.height + "px";
+	this.container.style.width = this.options.width + "px";
 
-	this.canvas.style.height = this.options.height + "px";
-	this.canvas.style.width = this.options.width + "px";
-	this.canvas.height = this.options.height * this.resolution;
-	this.canvas.width = this.options.width * this.resolution;
-
-	//scale the canva
-	this.ctx.scale(this.resolution, this.resolution);
+	this.layers.height(this.options.height);
+	this.layers.width(this.options.width);
 };
 
 /**
@@ -223,14 +252,18 @@ Aristochart.prototype.update = function() {
 
 		//Check the buffer to see if the elements are still being hovered
 		//if not, remove it from the buffer and call mouseout
+		var _buffer = []; //So many buffers
 		for(var i = 0, cache = this.mouseBuffer.length; i < cache; i++) {
 			var primitive = this.mouseBuffer[i];
 			if(current.indexOf(primitive) == -1) {
 				if(primitive.events.mouseout) primitive.events.mouseout.call(primitive);
 				primitive._mouseover = false;
-				this.mouseBuffer.splice(i, 1);
+			} else {
+				_buffer.push(primitive);
 			}
 		}
+
+		this.mouseBuffer = _buffer;
 
 		//And replace the coords
 		this._mouseX = this.mouseX;
@@ -245,24 +278,8 @@ Aristochart.prototype.update = function() {
  * @return {bull} 
  */
 Aristochart.prototype.render = function() {
-	//Fill the background
-	Aristochart.Tools.background(this.canvas, this.ctx, this.options.background);
-
 	//Render the registry of primitives
 	this.registry.render();
-};
-
-/**
- * Returns the scaled point on a canvas.
- * @param  {int} x X coord
- * @param  {int} y Y coord
- * @return {Object}   {x, y} scaled
- */
-Aristochart.prototype.point = function(x, y) {
-	return {
-		x: (x + this.box.x) * this.resolution,
-		y: (y + this.box.y) * this.resolution
-	}
 };
 
 /**
@@ -460,39 +477,11 @@ Aristochart.Chart = {
 			//Start by populating the registry
 			var points = this.data.getPoints();
 
-			// for(var line in points) {
-			// 	for(var i = 0, cache = points[line].length; i < cache; i++) {
-			// 		var point = points[line][i],
-			// 			x = ((point.x - this.data.x.min)/this.data.x.range) * this.box.width,
-			// 			y = ((point.y - this.data.y.min)/this.data.y.range) * this.box.height,
-			// 			scale = this.point(x, y);
-
-			// 		console.log(scale);
-
-			// 		var primitive = new this.options.line.point({
-			// 			x: scale.x,
-			// 			y: scale.y
-			// 		});
-
-			// 		this.registry.add(primitive);
-			// 	}
-			// }
+			console.log(this);
+			// this.layer(function() {
+			// 	this.point()
+			// })
 		}
-	}
-};
-
-/**
- * Aristochart canvas tools
- * @type {Object}
- */
-Aristochart.Tools = {
-	clear: function(canvas) {
-		canvas.width = canvas.width;
-	},
-
-	background: function(canvas, ctx, fill) {
-		ctx.fillStyle = fill;
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 };
 
@@ -536,15 +525,13 @@ Aristochart.Engine.prototype.stop = function() {
 };
 
 /**
- * Primitive class creator.
- *
- * @protocol Primitive
- *     getBoundingBox
- *     isInside( x, y )
- *     update
- *     render
+ * Primitive class creator
+ * @param {Object} style  The style related to the primitive
+ * @param {Object} obj    Data to be merged with the primitive
+ * @param {HTMLElement} canvas A canvas to render on
+ * @param {CanvasRenderingContext2D} ctx    The context to render ont
  */
-Aristochart.Primitive = function(canvas, ctx, style, obj) {
+Aristochart.Primitive = function(style, obj, canvas, ctx) {
 	if(!obj.render) Aristochart.Error("Aristochart.Primitive: Forgot to supply a render function when creating a primitive.");
 	if(!obj.isInside && !obj.getBoundingBox) Aristochart.Error("Aristochart.Primitive: Forgot to supply isInside or getBoundingBox functions. Supply both preferably.");
 
@@ -552,10 +539,6 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 	 * Primitive Constructor.
 	 */
 	var Primitive = function(data) {
-		//Color and dimension stores
-		this.colors = {};
-		this.dimensions = {};
-
 		//Default
 		this.index = 0;
 		this.visible = true;
@@ -564,15 +547,16 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 		this.alpha = 1;
 		this.rotation = 0;
 		this.scale = 1;
-
 		this.animationBuffer = [];
 
-		//Set the canvas and ctx
-		this.canvas = canvas;
+		//For extensibility outside of the layer function
 		this.ctx = ctx;
+		this.canvas = canvas;
 
 		//Add the primitive's events
 		this.events = obj.events || {};
+
+		console.log(this);
 
 		//Merge
 		if(data) Aristochart._deepMerge(data, this);
@@ -612,7 +596,7 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 	 * @return {null}
 	 */
 	Primitive.prototype.animate = function(properties, frames, callback, easing) {
-		if(typeof callback == "string") easing = new String(callback;
+		if(typeof callback == "string") easing = new String(callback), callback = undefined;
 		if(easing && !Aristochart.Easing[easing]) Aristochart.Error("Easing function '" + easing + "' does not exist. See Aristochart.Easing for a list of supported easing functions.");
 
 		for(var prop in properties) {
@@ -667,7 +651,6 @@ Aristochart.Primitive = function(canvas, ctx, style, obj) {
 				animation = { alpha: 1, x: cache };
 			break;
 		}
-
 
 		this.animate(animation, duration, callback, easing);
 	};
@@ -783,6 +766,71 @@ Aristochart.Registry.prototype = {
 		for (var i = this.registry.length - 1; i >= 0; i--) {
 			this.registry[i].render();
 		};
+	}
+};
+
+/**
+ * Aristochart's Layer class. Manages the canvas
+ */
+Aristochart.Layer = function(container, width, height) {
+	//Create the canvas
+	this.canvas = document.createElement("canvas");
+	this.ctx = this.canvas.getContext("2d");
+
+	//All layers are absolute
+	this.canvas.style.position = "absolute";
+
+	//Set the resolution
+	this.resolution = window.devicePixelRatio || 1;
+
+	//Set the layer width and height
+	this.width(width);
+	this.height(height);
+
+	//Set it to active by default
+	this.static = false;
+
+	//scale the canvas
+	this.ctx.scale(this.resolution, this.resolution);
+	
+	//Define the getter and setter for the index
+	Object.defineProperty(this, "index", {
+		get: function() {
+			return this._index;
+		},
+
+		set: function(value) {
+			this._index = value;
+			this.canvas.style.zIndex = value;
+		}
+	});
+
+	//Set the index	
+	this.index = container.children.length;
+
+	//Append the canvas
+	container.appendChild(this.canvas);
+
+};
+
+Aristochart.Layer.prototype = {
+	width: function(val) {
+		this.canvas.width = val * this.resolution;
+		this.canvas.style.width = val + "px";
+	},
+
+	height: function(val) {
+		this.canvas.height = val * this.resolution;
+		this.canvas.style.height = val + "px";
+	},
+
+	clear: function() {
+		this.ctx.clearRect(0, 0, this.canvas.height, this.canvas.width);
+	},
+
+	background: function(fill) {
+		ctx.fillStyle = fill;
+		ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 	}
 };
 
