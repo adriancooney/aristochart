@@ -51,14 +51,38 @@
 	</footer>
 </body>
 <!-- You edit below this line -->
-<script src="../../Aristochart.v2.js" type="text/javascript"></script>
+<script src="../../Aristochart.js" type="text/javascript"></script>
 <script type="text/javascript" id="example-code">
-var graph = new Aristochart(document.getElementById("holder"), {
-	type: "line",
+// Add your example
+var holder = document.getElementById("holder");
 
+var graph = new Aristochart(holder, {
 	data: {
-		x: [1, 2, 3, 4],
-		y: [1, 2, 3, 4]
+		x: 10,
+		y: [0, 1, 2, 3, 4, 5, 6, 6, 5, 4, 3, 3, 4, 5, 6, 7, 8, 9, 10],
+		y1: [10, 9, 8, 7, 7, 6, 2, 1, 1, 1],
+		y2: [4, 4, 4, 3, 3, 2, 2, 1, 0, 0, 0, 0]
+	},
+
+	legend: {
+		x: "Hadoop",
+		y: "Flash",
+		y1: "Socks",
+		y2: "Node.js"
+	},
+
+	style: {
+		x: {
+			legend: {
+				color: "#f00"
+			}
+		},
+
+		default: {
+			legend: {
+				color: "#000"
+			}
+		}
 	}
 });
 </script>

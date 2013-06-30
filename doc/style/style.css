@@ -288,7 +288,7 @@ footer p a {
   font-weight: bold;
 }
 .examples #holder {
-  text-align: center;
+  margin: 0 auto;
 }
 .examples pre {
   margin-right: 0;

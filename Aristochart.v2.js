@@ -1,3 +1,6 @@
+(function(window) {
+	"use strict";
+
 /**
  * Aristchart constructor
  * @param {Object} elem    DOM element
@@ -93,14 +96,15 @@ var Aristochart = function(elem, options, theme) {
  * Some enviornment variables
  */
 Aristochart.DEBUG = true;
-Aristochart.supported = ["pie", "line"];
+Aristochart.supported = ["pie", "line", "venn"];
 
 /**
  * Creates a new layer and propagates all the primitives related to the chart into a callback instance
  * @param  {Function} callback Callback with any further setup
+ * @param {boolean} static Declares whether the layer is static or not.
  * @return {null}            
  */
-Aristochart.prototype.layer = function(callback) {
+Aristochart.prototype.layer = function(callback, static) {
 	var layer = new Aristochart.Layer(this.container, this.options.width, this.options.height),
 		primitives = this.options[this.type];
 
@@ -110,6 +114,7 @@ Aristochart.prototype.layer = function(callback) {
 			if(!data) data = {};
 			data.ctx = layer.ctx;
 			data.canvas = layer.canvas;
+			data.static = static;
 			return new primitives[primitive](data);
 		};
 
@@ -468,24 +473,6 @@ Aristochart.Data.sanitize = {
 };
 
 /**
- * Chart initilizers
- * @type {Object}
- */
-Aristochart.Chart = {
-	line: {
-		init: function() {
-			//Start by populating the registry
-			var points = this.data.getPoints();
-
-			console.log(this);
-			// this.layer(function() {
-			// 	this.point()
-			// })
-		}
-	}
-};
-
-/**
  * Aristochart Render engine
  * @param {function} update The update function
  * @param {render} render The render function
@@ -496,7 +483,6 @@ Aristochart.Engine = function(context, update, render) {
 	this.render = render;
 	this.running = false;
 	this.frame = 0;
-	this.tags = [];
 };
 
 /**
@@ -533,7 +519,7 @@ Aristochart.Engine.prototype.stop = function() {
  */
 Aristochart.Primitive = function(style, obj, canvas, ctx) {
 	if(!obj.render) Aristochart.Error("Aristochart.Primitive: Forgot to supply a render function when creating a primitive.");
-	if(!obj.isInside && !obj.getBoundingBox) Aristochart.Error("Aristochart.Primitive: Forgot to supply isInside or getBoundingBox functions. Supply both preferably.");
+	if(obj.events && !obj.isInside) Aristochart.Error("Aristochart.Primitive: Event object supplied but no isInside function supplied.");
 
 	/**
 	 * Primitive Constructor.
@@ -542,6 +528,8 @@ Aristochart.Primitive = function(style, obj, canvas, ctx) {
 		//Default
 		this.index = 0;
 		this.visible = true;
+		this.static = false;
+		this.mouseEnabled = true;
 
 		//Animation variables
 		this.alpha = 1;
@@ -556,7 +544,9 @@ Aristochart.Primitive = function(style, obj, canvas, ctx) {
 		//Add the primitive's events
 		this.events = obj.events || {};
 
-		console.log(this);
+		//If there's no events associated with the primitive, there's no point in checking
+		//on mouseover etc.
+		if(!Object.keys(this.events)[0]) this.mouseEnabled = false;
 
 		//Merge
 		if(data) Aristochart._deepMerge(data, this);
@@ -735,7 +725,7 @@ Aristochart.Registry.prototype = {
 	 * @return {null}     
 	 */
 	add: function(primitive) {
-		if(Array.isArray(primitive)) this.registry.concat(primitive);
+		if(Array.isArray(primitive)) this.registry = this.registry.concat(primitive);
 		else this.registry.push(primitive);
 	},
 
@@ -1025,6 +1015,57 @@ Aristochart.Easing = {
 };
 
 /**
+ * Chart initilizers
+ * @type {Object}
+ */
+Aristochart.Chart = {
+	line: {
+		init: function() {
+			//Start by populating the registry
+			var points = this.data.getPoints();
+
+			var originX = this.box.x,
+				originY = this.box.y1;
+
+			//Axis Layer
+			this.layer(function() {
+				var xAxis = this.axis({
+					x: originX,
+					y: originY,
+					length: 340
+				});
+
+				var yAxis = this.axis({
+					x: originX,
+					y: originY,
+					length: 200,
+					rotation: -Math.PI/2
+				})
+
+				this.registry.add([yAxis, xAxis]);
+			});
+		}
+	},
+
+	//Pluggable primitives
+	shapes: {
+		/**
+		 * Line primitive. Properties required
+		 * 	length - Length of the line
+		 * @type {[type]}
+		 */
+		line: function(ctx) {
+			ctx.beginPath();
+			ctx.moveTo(0, 0);
+			ctx.lineTo(this.length, 0);
+			ctx.closePath();
+			ctx.strokeStyle = this.stroke;
+			ctx.stroke();
+		}
+	}
+};
+
+/**
  * Aristochart's theme store.
  * @type {Object}
  */
@@ -1099,6 +1140,16 @@ Aristochart.Themes.default = {
 					this.mouseover = false;
 				}
 			}
+		},
+
+		/**
+		 * Data sent to primitive
+		 * 	length - length of axis
+		 * @type {Object}
+		 */
+		axis: {
+			//The axis line does not need to be interactive
+			render: Aristochart.Chart.shapes.line
 		}
 	},
 
@@ -1145,10 +1196,10 @@ Aristochart.Themes.default = {
 			},
 
 			line: {
-
 				//per line styling
 				default: {
-					visible: true
+					visible: true,
+					stroke: "#f00"
 				}
 			}
 		},
@@ -1188,3 +1239,8 @@ window.requestAnimFrame = (function(){
             window.setTimeout(callback, 1000 / 60);
           };
 })();
+
+//Expose the Aristochart variable
+window.Aristochart = Aristochart;
+
+})(window);

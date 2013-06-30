@@ -368,6 +368,85 @@ Aristochart.prototype.toImage = function() {
 };
 
 /**
+ * Base class for Aristochart primitives.
+ *
+ * @protocol Primitive
+ *     getBoundingBox
+ *     isInside( x, y )
+ *     update
+ *     render
+ */
+Aristochart.Primitive = function(type) {
+	this.index = 0;
+	this.visible = true;
+	this.x = 0;
+	this.y = 0;
+	this.rotation = 0;
+	this.scale = 1;
+	this.opacity = 0;
+
+	this.box = {
+
+	};
+};
+
+Aristochart.Primitive.prototype.transition = function(property, easing, frames) {
+
+};
+
+/**
+ * The Aristochart registry
+ * @type {Object}
+ */
+Aristochart.Registry = [];
+
+Aristochart._deepMerge({
+	/**
+	 * objectUnder -- Test to see if there is a primitive at coord x, y
+	 * @param  {int} x The x coordinate (raster)
+	 * @param  {int} y The y coordinate (raster)
+	 * @return {array}   Array of objects if any
+	 */
+	objectUnder: function(x, y) {
+		console.log(this);
+	},
+
+	/**
+	 * add -- Adds an primitive to the registry
+	 * @param {Object} obj The primitive to add
+	 * @return {null}     
+	 */
+	add: function(obj) {
+
+	},
+
+	/**
+	 * remove -- Remove an object from the registry
+	 * @param  {Object} obj The object/primitive to remove
+	 * @return {null}     
+	 */
+	remove: function(obj) {
+
+	},
+
+	/**
+	 * Updates the registry
+	 * @return {null} 
+	 */
+	update: function() {
+
+	},
+
+	/**
+	 * Renders the registry
+	 * @return {null} 
+	 */
+	render: function() {
+
+	}
+}, Aristochart.Registry);
+
+/**
  * Aristochart's default render functions
  */
 Aristochart.point = {
