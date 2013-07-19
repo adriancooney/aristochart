@@ -343,8 +343,8 @@
 				recur = div.getElementsByTagName("div");
 
 			var a = document.createElement("a");
-			a.href = "#" + namespace + span.innerText.toLowerCase();
-			a.innerText = span.innerText;
+			a.href = "#" + namespace + span.textContent.toLowerCase();
+			a.textContent = span.textContent;
 			span.innerHTML = "";
 			span.appendChild(a);
 
@@ -354,7 +354,7 @@
 
 	//Add the id's to the headers
 	Array.prototype.forEach.call(document.querySelectorAll("h2"), function(h) {
-		if(!h.id) h.id = namespace + h.innerText.toLowerCase();
+		if(!h.id) h.id = namespace + h.textContent.toLowerCase();
 	});
 
 	//Make the options view pretty
@@ -368,19 +368,19 @@
 		text = text.replace(/\b([0-9]+)\b/g, "<span class=\"number\">$1</span>");
 
 		return text;
-	})(optionsView.innerText);
+	})(optionsView.textContent);
 
 	Array.prototype.forEach.call(optionsView.getElementsByClassName("comment"), function(comment) {
-		var commentText = comment.innerText;
+		var commentText = comment.textContent;
 
-		comment.innerText = "[..]";
+		comment.textContent = "[..]";
 
 		comment.addEventListener("mouseover", function() {
-			comment.innerText = commentText;
+			comment.textContent = commentText;
 		});
 
 		comment.addEventListener("mouseout", function() {
-			comment.innerText = "[..]";
+			comment.textContent = "[..]";
 		})
 	})
 </script>

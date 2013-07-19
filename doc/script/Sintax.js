@@ -5,9 +5,9 @@
  */
 var Sintax = {
 	highlight: function(pre) {
-		if(pre) pre.innerHTML = Sintax.syntaxHighlight(pre.innerText || pre.textContent);
+		if(pre) pre.innerHTML = Sintax.syntaxHighlight(pre.textContent || pre.textContent);
 		else Array.prototype.forEach.call(document.getElementsByTagName("pre"), function(pre) {
-			pre.innerHTML = Sintax.syntaxHighlight(pre.innerText || pre.textContent);
+			pre.innerHTML = Sintax.syntaxHighlight(pre.textContent);
 		});
 	},
 
