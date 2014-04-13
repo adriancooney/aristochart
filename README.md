@@ -1,6 +1,6 @@
 # Aristochart
 ### Sophisticated and simplified static Javascript 2D line charts
-### [http://dunxrion.github.com/aristochart](http://dunxrion.github.com/aristochart)
+### [http://adriancooney.github.com/aristochart](http://dunxrion.github.com/aristochart)
 Every find yourself looking for a chart library that isn't so damn huge and doesn't have any dependencies? I did too and couldn't find any so I decided to create my own. Aristochart is small but it's robust and made to be hacked. The main focus was customization so the library is incredibly extensible.
 
 ## Features
